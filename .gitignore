@@ -56,3 +56,8 @@ Thumbs.db
 # Test files
 test-*.js
 !test-assistant.example.js
+
+# Build output
+.next/
+out/
+dist/
