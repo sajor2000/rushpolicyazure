@@ -133,7 +133,7 @@ export default function Home() {
           <p className="text-center text-red-800 font-medium">
             BETA DEMO DISCLAIMER: This is a demonstration version built by Dr. Juan C. Rojas 
             using secure Azure resources. For demo purposes only - not for production use 
-            without proper IT approval. All responses are logged for security purposes.
+            without proper IT approval.
           </p>
         </div>
 
