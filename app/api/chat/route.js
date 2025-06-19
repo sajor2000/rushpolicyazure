@@ -11,7 +11,7 @@ const ASSISTANT_ID = process.env.ASSISTANT_ID;
 
 export async function POST(request) {
   console.log('API Route called:', new Date().toISOString());
-  
+
   // Check if environment variables are set
   if (!process.env.AZURE_OPENAI_API_KEY || !process.env.AZURE_OPENAI_ENDPOINT) {
     console.error('Missing Azure OpenAI configuration');
@@ -36,7 +36,14 @@ export async function POST(request) {
 
     await client.beta.threads.messages.create(thread.id, {
       role: "user",
-      content: message
+      content: `Please provide information about: "${message}"
+
+Format your response like an official policy document with:
+- Clear section headers and subsections
+- Numbered or lettered points when appropriate
+- Proper document structure
+- Professional language
+- Include relevant policy numbers, effective dates, or document references when available`
     });
 
     const run = await client.beta.threads.runs.create(thread.id, {
@@ -47,12 +54,12 @@ export async function POST(request) {
     let runStatus = await client.beta.threads.runs.retrieve(thread.id, run.id);
     let attempts = 0;
     const maxAttempts = 30;
-    
+
     while ((runStatus.status === 'queued' || runStatus.status === 'in_progress') && attempts < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       runStatus = await client.beta.threads.runs.retrieve(thread.id, run.id);
       attempts++;
-      
+
       if (attempts % 5 === 0) {
         console.log(`Still processing... (${attempts}s)`);
       }
@@ -63,7 +70,7 @@ export async function POST(request) {
     if (runStatus.status === 'completed') {
       const messages = await client.beta.threads.messages.list(thread.id);
       const assistantMessage = messages.data.find(m => m.role === 'assistant');
-      
+
       if (assistantMessage && assistantMessage.content[0]) {
         const response = assistantMessage.content[0].text.value;
         console.log('Response length:', response.length, 'characters');
@@ -88,7 +95,7 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('API Error:', error);
-    
+
     // Check for specific Azure connection errors
     if (error.message && error.message.includes('ENOTFOUND')) {
       return NextResponse.json({ 
@@ -97,7 +104,7 @@ export async function POST(request) {
         hint: 'Azure firewall may be blocking Vercel IPs'
       }, { status: 500 });
     }
-    
+
     if (error.status === 401) {
       return NextResponse.json({ 
         error: 'Authentication failed',
@@ -105,7 +112,7 @@ export async function POST(request) {
         hint: 'Check your API key in Vercel environment variables'
       }, { status: 500 });
     }
-    
+
     return NextResponse.json({ 
       error: 'Failed to process request',
       details: error.message,

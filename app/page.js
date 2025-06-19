@@ -16,12 +16,72 @@ export default function Home() {
     scrollToBottom();
   }, [messages]);
 
+  // Format content to look like a policy document
+  const formatDocumentContent = (content) => {
+    const lines = content.split('\n');
+    const formatted = [];
+    let currentSection = null;
+
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
+
+      if (!trimmedLine) {
+        formatted.push(<div key={index} className="mb-3"></div>);
+        return;
+      }
+
+      // Main headers (all caps or title case with colons)
+      if (trimmedLine.includes(':') && (trimmedLine === trimmedLine.toUpperCase() || /^[A-Z][a-z]/.test(trimmedLine))) {
+        formatted.push(
+          <h2 key={index} className="text-lg font-bold text-gray-900 mb-3 mt-6 first:mt-0 border-b border-gray-300 pb-2">
+            {trimmedLine}
+          </h2>
+        );
+      }
+      // Numbered sections (1., 2., 3., etc.)
+      else if (/^\d+\./.test(trimmedLine)) {
+        formatted.push(
+          <div key={index} className="mb-3">
+            <h3 className="font-semibold text-gray-800 mb-2">{trimmedLine}</h3>
+          </div>
+        );
+      }
+      // Lettered subsections (a., b., c., etc.)
+      else if (/^[a-z]\./i.test(trimmedLine)) {
+        formatted.push(
+          <div key={index} className="ml-4 mb-2">
+            <p className="text-gray-700">{trimmedLine}</p>
+          </div>
+        );
+      }
+      // Bullet points or dashes
+      else if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-') || trimmedLine.startsWith('*')) {
+        formatted.push(
+          <div key={index} className="ml-6 mb-2 flex">
+            <span className="mr-2 text-[#006341]">•</span>
+            <p className="text-gray-700 flex-1">{trimmedLine.substring(1).trim()}</p>
+          </div>
+        );
+      }
+      // Regular paragraphs
+      else {
+        formatted.push(
+          <p key={index} className="mb-3 text-gray-700 leading-relaxed">
+            {trimmedLine}
+          </p>
+        );
+      }
+    });
+
+    return formatted;
+  };
+
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
     const userMessage = inputValue;
     setInputValue('');
-    
+
     // Add user message
     setMessages(prev => [...prev, { type: 'user', content: userMessage }]);
     setIsLoading(true);
@@ -36,7 +96,7 @@ export default function Home() {
       });
 
       const data = await response.json();
-      
+
       // Add bot response
       setMessages(prev => [...prev, { type: 'bot', content: data.response }]);
     } catch (error) {
@@ -76,7 +136,7 @@ export default function Home() {
             without proper IT approval. All responses are logged for security purposes.
           </p>
         </div>
-        
+
         <div className="mt-4 flex items-start space-x-2 text-gray-600">
           <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
           <p className="text-sm">
@@ -103,17 +163,47 @@ export default function Home() {
                   key={index}
                   className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div
-                    className={`max-w-3xl px-4 py-3 rounded-lg ${
-                      message.type === 'user'
-                        ? 'bg-[#006341] text-white'
-                        : 'bg-gray-100 text-gray-900'
-                    }`}
-                  >
-                    {message.content.split('\n').map((line, i) => (
-                      <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>
-                    ))}
-                  </div>
+                  {message.type === 'user' ? (
+                    <div
+                      className={`max-w-3xl px-4 py-3 rounded-lg bg-[#006341] text-white`}
+                    >
+                      {message.content.split('\n').map((line, i) => (
+                        <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex space-x-3 justify-start">
+                      <div className="w-8 h-8 bg-[#006341] rounded-full flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 bg-white rounded-lg shadow-sm border document-style">
+                        {/* Document Header */}
+                        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 rounded-t-lg">
+                          <div className="flex items-center space-x-2">
+                            <FileText className="w-5 h-5 text-[#006341]" />
+                            <h3 className="font-semibold text-gray-900">Rush University Policy Document</h3>
+                          </div>
+                          <p className="text-sm text-gray-600 mt-1">Retrieved from official policy database</p>
+                        </div>
+
+                        {/* Document Content */}
+                        <div className="p-6">
+                          <div className="document-content">
+                            {formatDocumentContent(message.content)}
+                          </div>
+
+                          {/* Document Footer */}
+                          <div className="mt-6 pt-4 border-t border-gray-200">
+                            <div className="text-xs text-gray-500 space-y-1">
+                              <p>📄 Source: Rush University Official Policy Database</p>
+                              <p>🔒 Access Level: Authorized Personnel Only</p>
+                              <p>📅 Retrieved: {new Date().toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))
             )}
