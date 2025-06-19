@@ -12,6 +12,15 @@ const ASSISTANT_ID = process.env.ASSISTANT_ID;
 export async function POST(request) {
   console.log('API Route called:', new Date().toISOString());
   
+  // Check if environment variables are set
+  if (!process.env.AZURE_OPENAI_API_KEY || !process.env.AZURE_OPENAI_ENDPOINT) {
+    console.error('Missing Azure OpenAI configuration');
+    return NextResponse.json({ 
+      error: 'Server configuration error', 
+      details: 'Azure OpenAI credentials not configured'
+    }, { status: 500 });
+  }
+
   try {
     const body = await request.json();
     const { message } = body;
@@ -79,9 +88,28 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('API Error:', error);
+    
+    // Check for specific Azure connection errors
+    if (error.message && error.message.includes('ENOTFOUND')) {
+      return NextResponse.json({ 
+        error: 'Azure connection failed',
+        details: 'Cannot reach Azure OpenAI endpoint. This might be due to network restrictions.',
+        hint: 'Azure firewall may be blocking Vercel IPs'
+      }, { status: 500 });
+    }
+    
+    if (error.status === 401) {
+      return NextResponse.json({ 
+        error: 'Authentication failed',
+        details: 'Azure OpenAI API key is invalid or expired',
+        hint: 'Check your API key in Vercel environment variables'
+      }, { status: 500 });
+    }
+    
     return NextResponse.json({ 
       error: 'Failed to process request',
       details: error.message,
+      errorType: error.constructor.name,
       hint: 'Check server logs for more details'
     }, { status: 500 });
   }
