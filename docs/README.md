@@ -127,26 +127,30 @@ node test-assistant.js
 
 ## 🚢 Deployment
 
-### Vercel (Recommended)
+### Replit (Recommended for Demo)
 
-1. **Install Vercel CLI**
-   ```bash
-   npm i -g vercel
-   ```
+This application is optimized for Replit deployment:
 
-2. **Deploy**
-   ```bash
-   vercel
-   ```
+1. **Configure environment variables** in Replit Secrets
+2. **Click the Deploy button** in the Replit interface
+3. **Choose Autoscale deployment** for production-like scaling
 
-3. **Set environment variables** in Vercel dashboard
+### Azure (Production Deployment)
+
+For enterprise production deployment to Microsoft Azure:
+
+- **[Azure Deployment Guide](./AZURE_DEPLOYMENT.md)** - Complete guide for Azure App Service deployment
+- Includes Azure AD authentication setup
+- Application Insights monitoring
+- Auto-scaling configuration
+- Security best practices
 
 ### Other Platforms
 
-The app can be deployed to any platform that supports Next.js:
+The app can also be deployed to:
+- Vercel
 - AWS Amplify
 - Netlify
-- Azure Static Web Apps
 - Railway
 - Render
 
