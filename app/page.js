@@ -131,7 +131,7 @@ export default function Home() {
       console.error("Error sending message:", error);
       setMessages(prev => [...prev, {
         type: 'bot',
-        content: 'I apologize, but I\'m having trouble connecting to the policy database. Please try again later.'
+        content: 'I apologize, but I\'m having trouble connecting to the PolicyTech database. Please try again or contact IT support if the issue persists.'
       }]);
     } finally {
       setIsLoading(false);
@@ -147,32 +147,26 @@ export default function Home() {
             <div className="w-16 h-16 bg-gradient-to-br from-growth-green to-legacy-green rounded-xl flex items-center justify-center mb-4 shadow-md">
               <FileText className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-rush-black">Welcome to Rush Policy Assistant</h1>
+            <h1 className="text-2xl font-bold text-rush-black">Rush Policy Assistant</h1>
             <p className="mt-2 text-raw-umber max-w-2xl">
-              I&apos;m here to help you find and understand Rush University policies, procedures, and guidelines.
-              I have access to over 800 official policy documents to assist you.
+              I&apos;m here to help you find and understand all the Rush University System for Health policies, procedures, and guidelines that are available in PolicyTech. Chat with them in a conversational way and get the right answer when you need it.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Disclaimer */}
+      {/* Information Banner */}
       <div className="max-w-4xl mx-auto w-full px-4 mt-6">
-        <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-start space-x-3">
-          <AlertCircle className="w-6 h-6 text-rose-600 flex-shrink-0 mt-0.5" />
-          <p className="text-center text-rose-800 font-medium text-sm leading-relaxed">
-            BETA DEMO DISCLAIMER: This is a demonstration version built by Dr. Juan C. Rojas
-            using secure Azure resources. For demo purposes only - not for production use
-            without proper IT approval.
-          </p>
-        </div>
-
-        <div className="mt-4 flex items-start space-x-2 text-sm text-gray-600">
-          <Shield className="w-5 h-5 mt-0.5 flex-shrink-0 text-vitality-green" />
-          <p className="text-raw-umber">
-            Responses are AI-generated from official policy documents. Please verify critical information
-            with your department head or the policy owner listed in the source documents.
-          </p>
+        <div className="bg-sage border border-wash-green rounded-xl p-4 flex items-start space-x-3">
+          <Shield className="w-6 h-6 text-growth-green flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-rush-black font-medium text-sm leading-relaxed">
+              Secure access to Rush University System for Health PolicyTech database
+            </p>
+            <p className="text-raw-umber text-xs mt-1">
+              All responses are generated from official policy documents. For critical decisions, please verify with the policy owner or your department head.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -190,8 +184,8 @@ export default function Home() {
             {messages.length === 0 ? (
               <div className="text-center text-gray-500 mt-20">
                 <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p className="text-lg font-semibold text-rush-black">Start by asking about any Rush policy</p>
-                <p className="text-sm mt-2 text-raw-umber">Example: &quot;What is the vacation policy?&quot; or &quot;Tell me about HIPAA requirements&quot;</p>
+                <p className="text-lg font-semibold text-rush-black">Ask me about any Rush University System policy</p>
+                <p className="text-sm mt-2 text-raw-umber">Example: &quot;What is the vacation policy?&quot; or &quot;Tell me about HIPAA compliance requirements&quot;</p>
               </div>
             ) : (
               messages.map((message, index) => (
@@ -218,9 +212,9 @@ export default function Home() {
                         <div className="bg-sage px-6 py-4 border-b border-wash-green">
                           <div className="flex items-center space-x-2">
                             <FileText className="w-5 h-5 text-growth-green" />
-                            <h3 className="font-semibold text-rush-black">Rush University Policy Document</h3>
+                            <h3 className="font-semibold text-rush-black">Rush University System for Health Policy</h3>
                           </div>
-                          <p className="text-sm text-raw-umber mt-1">Retrieved from official policy database</p>
+                          <p className="text-sm text-raw-umber mt-1">Retrieved from PolicyTech database</p>
                         </div>
 
                         {/* Document Content */}
@@ -232,8 +226,8 @@ export default function Home() {
                           {/* Document Footer */}
                           <div className="mt-6 pt-4 border-t border-wash-green">
                             <div className="text-xs text-wash-gray space-y-1">
-                              <p>📄 Source: Rush University Official Policy Database</p>
-                              <p>🔒 Access Level: Authorized Personnel Only</p>
+                              <p>📄 Source: Rush University System PolicyTech Database</p>
+                              <p>🔒 Access Level: Authorized Rush Personnel</p>
                               <p>📅 Retrieved: {new Date().toLocaleDateString()}</p>
                             </div>
                           </div>
@@ -295,7 +289,7 @@ export default function Home() {
       <footer className="mt-4 py-6 text-center text-sm text-raw-umber border-t border-rush-gray">
         <div className="max-w-4xl mx-auto px-4 flex items-center justify-center space-x-2">
           <Shield className="w-4 h-4 text-vitality-green" />
-          <span>Beta Demo: Secured with Azure enterprise-grade encryption and access controls</span>
+          <span>Secured with Azure enterprise-grade encryption • Rush credentials required</span>
         </div>
       </footer>
     </div>
