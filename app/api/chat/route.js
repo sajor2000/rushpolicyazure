@@ -38,12 +38,13 @@ export async function POST(request) {
       role: "user",
       content: `Please provide information about: "${message}"
 
-Format your response like an official policy document with:
-- Clear section headers and subsections
-- Numbered or lettered points when appropriate
-- Proper document structure
-- Professional language
-- Include relevant policy numbers, effective dates, or document references when available`
+Respond in this exact format:
+
+SYNTHESIZED_ANSWER:
+[Provide a conservative, factual answer to the specific question in 2-3 paragraphs maximum. Be direct, conservative, and factual with no creativity. Answer only what was asked.]
+
+FULL_POLICY_DOCUMENT:
+[Provide the complete, exact policy document text as it appears in PolicyTech. Include all original formatting, section numbers, headers, effective dates, policy numbers, and exact language. This should be a verbatim copy of the original document.]`
     });
 
     const run = await client.beta.threads.runs.create(thread.id, {

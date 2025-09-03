@@ -97,7 +97,58 @@ p, span, div, body {
   margin-bottom: 4px;
 }
 
-/* Policy document specific styling */
+/* PolicyTech Document Reproduction Styling */
+.policy-document {
+  font-family: 'Times', 'Times New Roman', serif;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #000;
+  background: white;
+}
+
+.policy-document h1, .policy-document h2, .policy-document h3 {
+  font-family: 'Times', 'Times New Roman', serif;
+  font-weight: bold;
+  color: #000;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.policy-document h1 {
+  font-size: 16px;
+  text-align: center;
+  text-transform: uppercase;
+  border-bottom: 2px solid #000;
+  padding-bottom: 4px;
+}
+
+.policy-document h2 {
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+.policy-document h3 {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.policy-document p {
+  margin-bottom: 12px;
+  text-align: justify;
+  text-indent: 20px;
+}
+
+.policy-document ul, .policy-document ol {
+  margin: 12px 0;
+  padding-left: 40px;
+}
+
+.policy-document li {
+  margin-bottom: 6px;
+  text-align: justify;
+}
+
+/* Policy-specific formatting */
 .policy-section {
   border-left: 3px solid #006341;
   padding-left: 12px;
@@ -109,11 +160,30 @@ p, span, div, body {
 .effective-date {
   font-style: italic;
   color: #666;
-  font-size: 12px;
+  font-size: 11px;
+  text-align: right;
+  margin-top: 20px;
 }
 
 .policy-number {
   font-weight: bold;
-  color: #006341;
+  color: #000;
   font-size: 12px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.policy-header {
+  text-align: center;
+  border-bottom: 1px solid #000;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+
+.policy-footer {
+  border-top: 1px solid #000;
+  padding-top: 8px;
+  margin-top: 20px;
+  text-align: center;
+  font-size: 10px;
 }

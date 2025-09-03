@@ -39,11 +39,21 @@ export default function Home() {
     scrollToBottom();
   }, [messages]);
 
-  // Format content to look like a policy document
+  // Parse and format dual-response content
+  const parseResponse = (content) => {
+    const synthesizedMatch = content.match(/SYNTHESIZED_ANSWER:\s*(.*?)\s*(?=FULL_POLICY_DOCUMENT:|$)/s);
+    const documentMatch = content.match(/FULL_POLICY_DOCUMENT:\s*(.*)/s);
+    
+    return {
+      synthesizedAnswer: synthesizedMatch ? synthesizedMatch[1].trim() : '',
+      fullDocument: documentMatch ? documentMatch[1].trim() : content
+    };
+  };
+
+  // Format content to look like a policy document (for full document section)
   const formatDocumentContent = (content) => {
     const lines = content.split('\n');
     const formatted = [];
-    let currentSection = null;
 
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
@@ -207,31 +217,71 @@ export default function Home() {
                       <div className="w-10 h-10 bg-gradient-to-br from-growth-green to-legacy-green rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
                         <FileText className="w-5 h-5 text-white" />
                       </div>
-                      <div className="flex-1 bg-white rounded-xl shadow-md border border-wash-green document-style overflow-hidden">
-                        {/* Document Header */}
-                        <div className="bg-sage px-6 py-4 border-b border-wash-green">
-                          <div className="flex items-center space-x-2">
-                            <FileText className="w-5 h-5 text-growth-green" />
-                            <h3 className="font-semibold text-rush-black">Rush University System for Health Policy</h3>
-                          </div>
-                          <p className="text-sm text-raw-umber mt-1">Retrieved from PolicyTech database</p>
-                        </div>
+                      <div className="flex-1 space-y-4">
+                        {(() => {
+                          const { synthesizedAnswer, fullDocument } = parseResponse(message.content);
+                          
+                          return (
+                            <>
+                              {/* AI Synthesized Answer */}
+                              {synthesizedAnswer && (
+                                <div className="bg-white rounded-xl shadow-md border border-cerulean-blue overflow-hidden">
+                                  <div className="bg-gradient-to-r from-cerulean-blue to-deep-blue px-6 py-4">
+                                    <div className="flex items-center space-x-2">
+                                      <Shield className="w-5 h-5 text-white" />
+                                      <h3 className="font-semibold text-white">AI Assistant Response</h3>
+                                    </div>
+                                    <p className="text-blue-100 text-sm mt-1">Direct answer to your question</p>
+                                  </div>
+                                  <div className="p-6">
+                                    <div className="text-rush-black leading-relaxed">
+                                      {synthesizedAnswer.split('\n').map((paragraph, idx) => (
+                                        paragraph.trim() && (
+                                          <p key={idx} className="mb-3 last:mb-0">{paragraph.trim()}</p>
+                                        )
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
 
-                        {/* Document Content */}
-                        <div className="p-6">
-                          <div className="document-content">
-                            {formatDocumentContent(message.content)}
-                          </div>
+                              {/* Full Policy Document */}
+                              <div className="bg-white rounded-xl shadow-md border border-wash-green document-style overflow-hidden">
+                                {/* Document Header */}
+                                <div className="bg-sage px-6 py-4 border-b border-wash-green">
+                                  <div className="flex items-center space-x-2">
+                                    <FileText className="w-5 h-5 text-growth-green" />
+                                    <h3 className="font-semibold text-rush-black">Rush University System for Health Policy Document</h3>
+                                  </div>
+                                  <p className="text-sm text-raw-umber mt-1">Exact copy from PolicyTech database</p>
+                                </div>
 
-                          {/* Document Footer */}
-                          <div className="mt-6 pt-4 border-t border-wash-green">
-                            <div className="text-xs text-wash-gray space-y-1">
-                              <p>📄 Source: Rush University System PolicyTech Database</p>
-                              <p>🔒 Access Level: Authorized Rush Personnel</p>
-                              <p>📅 Retrieved: {new Date().toLocaleDateString()}</p>
-                            </div>
-                          </div>
-                        </div>
+                                {/* Document Content - Exact PolicyTech Format */}
+                                <div className="p-6 bg-white" style={{ fontFamily: 'Times, serif', fontSize: '12px', lineHeight: '1.4' }}>
+                                  <div className="document-content policy-document">
+                                    {formatDocumentContent(fullDocument)}
+                                  </div>
+
+                                  {/* Document Footer */}
+                                  <div className="mt-8 pt-4 border-t border-wash-green">
+                                    <div className="text-xs text-wash-gray space-y-1">
+                                      <p>📄 Source: Rush University System PolicyTech Database</p>
+                                      <p>🔒 Access Level: Authorized Rush Personnel Only</p>
+                                      <p>📅 Retrieved: {new Date().toLocaleDateString('en-US', { 
+                                        year: 'numeric', 
+                                        month: 'long', 
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}</p>
+                                      <p>⚠️ This document is the property of Rush University System for Health</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   )}
