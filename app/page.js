@@ -157,8 +157,8 @@ export default function Home() {
             <div className="w-16 h-16 bg-gradient-to-br from-growth-green to-legacy-green rounded-xl flex items-center justify-center mb-4 shadow-md">
               <FileText className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-rush-black">Rush Policy Assistant</h1>
-            <p className="mt-2 text-raw-umber max-w-2xl">
+            <h1 className="text-3xl font-semibold text-rush-black leading-tight">Rush Policy Assistant</h1>
+            <p className="mt-3 text-base text-raw-umber max-w-2xl leading-relaxed">
               I&apos;m here to help you find and understand all the Rush University System for Health policies, procedures, and guidelines that are available in PolicyTech. Chat with them in a conversational way and get the right answer when you need it.
             </p>
           </div>
@@ -185,8 +185,8 @@ export default function Home() {
         <div className="bg-white rounded-2xl shadow-lg border border-rush-gray h-full max-h-[600px] flex flex-col overflow-hidden">
           {/* Chat Header */}
           <div className="border-b border-rush-gray p-6 bg-gradient-to-r from-sage to-ivory">
-            <h2 className="text-xl font-semibold text-rush-black mb-1">Policy Assistant Chat</h2>
-            <p className="text-sm text-raw-umber">Ask me anything about Rush University policies</p>
+            <h2 className="text-xl font-semibold text-rush-black mb-2">Policy Assistant Chat</h2>
+            <p className="text-sm text-raw-umber leading-relaxed">Ask me anything about Rush University policies</p>
           </div>
 
           {/* Messages Area */}
@@ -194,8 +194,8 @@ export default function Home() {
             {messages.length === 0 ? (
               <div className="text-center text-gray-500 mt-20">
                 <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p className="text-lg font-semibold text-rush-black">Ask me about any Rush University System policy</p>
-                <p className="text-sm mt-2 text-raw-umber">Example: &quot;What is the vacation policy?&quot; or &quot;Tell me about HIPAA compliance requirements&quot;</p>
+                <p className="text-lg font-semibold text-rush-black mb-2">Ask me about any Rush University System policy</p>
+                <p className="text-sm text-raw-umber leading-relaxed">Example: &quot;What is the vacation policy?&quot; or &quot;Tell me about HIPAA compliance requirements&quot;</p>
               </div>
             ) : (
               messages.map((message, index) => (

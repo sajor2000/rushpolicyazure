@@ -23,15 +23,15 @@ body {
 /* Rush Button Components */
 @layer components {
   .btn-primary {
-    @apply bg-growth-green hover:bg-legacy-green active:bg-legacy-green text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 inline-flex items-center justify-center space-x-2;
+    @apply bg-growth-green hover:bg-legacy-green active:bg-legacy-green text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 inline-flex items-center justify-center space-x-2 shadow-md hover:shadow-lg;
   }
   
   .btn-secondary {
-    @apply bg-transparent hover:bg-sage active:bg-wash-green border-2 border-growth-green text-growth-green font-medium py-3 px-6 rounded-lg transition-all duration-200 inline-flex items-center justify-center space-x-2;
+    @apply bg-transparent hover:bg-sage active:bg-wash-green border-2 border-growth-green text-growth-green font-semibold py-3 px-6 rounded-xl transition-all duration-200 inline-flex items-center justify-center space-x-2 shadow-sm hover:shadow-md;
   }
   
   .btn-tertiary {
-    @apply bg-transparent hover:bg-sage active:bg-wash-green text-growth-green font-medium py-2 px-4 rounded-lg transition-all duration-200 inline-flex items-center justify-center space-x-2;
+    @apply bg-transparent hover:bg-sage active:bg-wash-green text-growth-green font-medium py-2 px-4 rounded-xl transition-all duration-200 inline-flex items-center justify-center space-x-2;
   }
   
   .btn-text {
@@ -58,29 +58,33 @@ p, span, div, body {
 .document-content {
   font-size: 14px;
   color: #1a1a1a;
+  line-height: 1.6;
 }
 
 .document-content h1 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   text-align: center;
-  margin: 20px 0;
+  margin: 24px 0 16px 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: #006332;
 }
 
 .document-content h2 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
-  margin: 16px 0 8px 0;
-  color: #2d2d2d;
+  margin: 20px 0 12px 0;
+  color: #006332;
+  border-bottom: 2px solid #00A66C;
+  padding-bottom: 4px;
 }
 
 .document-content h3 {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
-  margin: 12px 0 6px 0;
-  color: #2d2d2d;
+  margin: 16px 0 8px 0;
+  color: #00A66C;
 }
 
 .document-content p {
@@ -100,8 +104,8 @@ p, span, div, body {
 /* PolicyTech Document Reproduction Styling */
 .policy-document {
   font-family: 'Times', 'Times New Roman', serif;
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: 13px;
+  line-height: 1.5;
   color: #000;
   background: white;
 }
@@ -109,27 +113,30 @@ p, span, div, body {
 .policy-document h1, .policy-document h2, .policy-document h3 {
   font-family: 'Times', 'Times New Roman', serif;
   font-weight: bold;
-  color: #000;
-  margin-top: 16px;
-  margin-bottom: 8px;
+  color: #006332;
+  margin-top: 20px;
+  margin-bottom: 12px;
 }
 
 .policy-document h1 {
-  font-size: 16px;
+  font-size: 18px;
   text-align: center;
   text-transform: uppercase;
-  border-bottom: 2px solid #000;
-  padding-bottom: 4px;
+  border-bottom: 3px solid #00A66C;
+  padding-bottom: 8px;
+  margin-bottom: 20px;
 }
 
 .policy-document h2 {
-  font-size: 14px;
+  font-size: 16px;
   text-decoration: underline;
+  color: #00A66C;
 }
 
 .policy-document h3 {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: bold;
+  color: #006332;
 }
 
 .policy-document p {
