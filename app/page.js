@@ -178,47 +178,27 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="bg-white py-20 relative overflow-hidden">
-        {/* Background decorative elements - inspired by Rush website */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-20 text-sage opacity-10">
-            <Plus className="h-8 w-8" />
-          </div>
-          <div className="absolute top-40 right-32 text-sage opacity-10">
-            <Plus className="h-6 w-6" />
-          </div>
-          <div className="absolute bottom-32 left-1/4 text-sage opacity-10">
-            <Plus className="h-10 w-10" />
-          </div>
-          <div className="absolute bottom-20 right-20 text-sage opacity-10">
-            <Plus className="h-7 w-7" />
-          </div>
-        </div>
-
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-8 leading-tight">
-              Among the nation's best
-              <span className="block text-rush-green">policy guidance.</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed">
-              I'm here to help you find and understand all the Rush University System for Health policies, procedures, and guidelines that are available also in PolicyTech, but here you can chat with them in a conversational way and get the right answer when you need it.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
-              <div className="flex items-center text-gray-600">
-                <Shield className="h-6 w-6 mr-3 text-rush-green" />
-                <span className="text-lg">Instant Access</span>
-              </div>
-              <div className="flex items-center text-gray-600">
-                <Zap className="h-6 w-6 mr-3 text-rush-green" />
-                <span className="text-lg">Real-time Search</span>
-              </div>
-              <div className="flex items-center text-gray-600">
-                <Users className="h-6 w-6 mr-3 text-rush-green" />
-                <span className="text-lg">Internal Tool</span>
-              </div>
+      {/* Internal Tool Header */}
+      <section className="bg-white py-12 border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-3xl font-semibold text-rush-black mb-4">
+            Rush Policy Assistant
+          </h1>
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            Search and chat with Rush University System for Health policies and procedures. Get instant answers to policy questions in a conversational format.
+          </p>
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
+            <div className="flex items-center">
+              <Shield className="h-4 w-4 mr-2 text-rush-green" />
+              <span>Internal Use Only</span>
+            </div>
+            <div className="flex items-center">
+              <FileText className="h-4 w-4 mr-2 text-rush-green" />
+              <span>PolicyTech Database</span>
+            </div>
+            <div className="flex items-center">
+              <MessageSquare className="h-4 w-4 mr-2 text-rush-green" />
+              <span>AI-Powered Search</span>
             </div>
           </div>
         </div>
