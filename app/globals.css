@@ -50,7 +50,10 @@ p, span, div, body {
 
 /* Document-style formatting */
 .policy-document {
-  @apply bg-gray-50 border-l-4 border-rush-green p-6 rounded-r-lg;
+  @apply bg-white border border-gray-300 p-8 rounded-lg shadow-sm;
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1.6;
+  color: #000;
 }
 
 /* Decorative elements inspired by Rush website */
@@ -79,9 +82,10 @@ p, span, div, body {
 }
 
 .document-content {
-  font-size: 14px;
-  color: #1a1a1a;
-  line-height: 1.6;
+  font-size: 12px;
+  color: #000;
+  line-height: 1.5;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .document-content h1 {
@@ -126,11 +130,45 @@ p, span, div, body {
 
 /* PolicyTech Document Reproduction Styling */
 .policy-document {
-  font-family: 'Times', 'Times New Roman', serif;
-  font-size: 13px;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 12px;
   line-height: 1.5;
   color: #000;
   background: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Policy document header styling */
+.policy-header-info {
+  font-size: 11px;
+  color: #333;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.policy-header-info p {
+  margin: 2px 0;
+  text-indent: 0;
+}
+
+/* Policy sections */
+.policy-section-header {
+  font-weight: bold;
+  font-size: 13px;
+  color: #000;
+  margin: 16px 0 8px 0;
+  text-decoration: underline;
+}
+
+.policy-subsection {
+  margin-left: 20px;
+  margin-bottom: 8px;
+}
+
+.policy-item {
+  margin-bottom: 6px;
 }
 
 .policy-document h1, .policy-document h2, .policy-document h3 {

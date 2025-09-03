@@ -54,52 +54,75 @@ export default function Home() {
   const formatDocumentContent = (content) => {
     const lines = content.split('\n');
     const formatted = [];
+    let isHeaderSection = true;
+    let headerLines = [];
 
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
 
+      // Detect header information (first several lines with colons)
+      if (isHeaderSection && (trimmedLine.includes(':') || trimmedLine.match(/^(Policy Title|Former Policy Number|Document Owner|Approver|Date|Review Due|Applies To|Reference Number)/))) {
+        headerLines.push(trimmedLine);
+        return;
+      } else if (isHeaderSection && trimmedLine === '') {
+        // Empty line after header, render header block
+        if (headerLines.length > 0) {
+          formatted.push(
+            <div key="header" className="policy-header-info">
+              {headerLines.map((headerLine, idx) => (
+                <p key={idx} className="text-xs text-black">{headerLine}</p>
+              ))}
+            </div>
+          );
+        }
+        isHeaderSection = false;
+        return;
+      } else if (isHeaderSection) {
+        isHeaderSection = false;
+        if (headerLines.length > 0) {
+          formatted.push(
+            <div key="header" className="policy-header-info">
+              {headerLines.map((headerLine, idx) => (
+                <p key={idx} className="text-xs text-black">{headerLine}</p>
+              ))}
+            </div>
+          );
+        }
+      }
+
       if (!trimmedLine) {
-        formatted.push(<div key={index} className="mb-3"></div>);
+        formatted.push(<div key={index} className="mb-2"></div>);
         return;
       }
 
-      // Main headers (all caps or title case with colons)
-      if (trimmedLine.includes(':') && (trimmedLine === trimmedLine.toUpperCase() || /^[A-Z][a-z]/.test(trimmedLine))) {
+      // Roman numerals or main sections
+      if (/^[IVX]+\.\s/.test(trimmedLine) || trimmedLine.match(/^(I\.|II\.|III\.|IV\.|V\.)/)) {
         formatted.push(
-          <h2 key={index} className="text-lg font-bold text-rush-black mb-3 mt-6 first:mt-0 border-b border-gray-300 pb-2">
+          <h2 key={index} className="policy-section-header font-bold text-black mt-4 mb-2 text-sm">
             {trimmedLine}
           </h2>
         );
       }
-      // Numbered sections (1., 2., 3., etc.)
-      else if (/^\d+\./.test(trimmedLine)) {
+      // Letter subsections (A., B., C., etc.)
+      else if (/^[A-Z]\.\s/.test(trimmedLine)) {
         formatted.push(
-          <div key={index} className="mb-3">
-            <h3 className="font-semibold text-rush-black mb-2">{trimmedLine}</h3>
+          <div key={index} className="policy-subsection mb-3">
+            <p className="font-semibold text-black text-xs mb-1">{trimmedLine}</p>
           </div>
         );
       }
-      // Lettered subsections (a., b., c., etc.)
-      else if (/^[a-z]\./i.test(trimmedLine)) {
+      // Numbered items (i., ii., iii., etc.)
+      else if (/^[ivx]+\.\s/.test(trimmedLine)) {
         formatted.push(
-          <div key={index} className="ml-6 mb-2">
-            <p className="text-raw-umber">{trimmedLine}</p>
-          </div>
-        );
-      }
-      // Bullet points or dashes
-      else if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-') || trimmedLine.startsWith('*')) {
-        formatted.push(
-          <div key={index} className="ml-8 mb-2 flex items-start">
-            <span className="mr-2 text-growth-green">•</span>
-            <p className="text-raw-umber flex-1">{trimmedLine.substring(1).trim()}</p>
+          <div key={index} className="policy-item ml-6 mb-2">
+            <p className="text-black text-xs">{trimmedLine}</p>
           </div>
         );
       }
       // Regular paragraphs
       else {
         formatted.push(
-          <p key={index} className="mb-3 text-raw-umber leading-relaxed">
+          <p key={index} className="mb-2 text-black text-xs leading-relaxed text-justify">
             {trimmedLine}
           </p>
         );
@@ -271,19 +294,19 @@ export default function Home() {
                               )}
 
                               {/* Full Policy Document */}
-                              <div className="bg-white rounded-xl shadow-md border border-wash-green document-style overflow-hidden">
+                              <div className="bg-white border border-gray-300 shadow-lg overflow-hidden rounded-lg">
                                 {/* Document Header */}
-                                <div className="bg-sage px-6 py-4 border-b border-wash-green">
+                                <div className="bg-gray-50 px-6 py-3 border-b border-gray-300">
                                   <div className="flex items-center space-x-2">
-                                    <FileText className="w-5 h-5 text-growth-green" />
-                                    <h3 className="font-semibold text-rush-black">Rush University System for Health Policy Document</h3>
+                                    <FileText className="w-4 h-4 text-gray-600" />
+                                    <h3 className="font-medium text-gray-800 text-sm">Rush University System for Health Policy Document</h3>
                                   </div>
-                                  <p className="text-sm text-raw-umber mt-1">Exact copy from PolicyTech database</p>
+                                  <p className="text-xs text-gray-600 mt-1">PolicyTech Database - Official Document</p>
                                 </div>
 
-                                {/* Document Content - Exact PolicyTech Format */}
-                                <div className="p-6 bg-white" style={{ fontFamily: 'Times, serif', fontSize: '12px', lineHeight: '1.4' }}>
-                                  <div className="document-content policy-document">
+                                {/* Document Content - Clean White Document Format */}
+                                <div className="p-8 bg-white">
+                                  <div className="policy-document">
                                     {formatDocumentContent(fullDocument)}
                                   </div>
 
