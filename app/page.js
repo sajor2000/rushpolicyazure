@@ -206,7 +206,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
               <div className="flex items-center text-gray-600">
                 <Shield className="h-6 w-6 mr-3 text-rush-green" />
-                <span className="text-lg">Secure & Compliant</span>
+                <span className="text-lg">Instant Access</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <Zap className="h-6 w-6 mr-3 text-rush-green" />
@@ -214,7 +214,7 @@ export default function Home() {
               </div>
               <div className="flex items-center text-gray-600">
                 <Users className="h-6 w-6 mr-3 text-rush-green" />
-                <span className="text-lg">For Rush Staff</span>
+                <span className="text-lg">Internal Tool</span>
               </div>
             </div>
           </div>
@@ -433,7 +433,7 @@ export default function Home() {
       <footer className="mt-4 py-6 text-center text-sm text-raw-umber border-t border-rush-gray">
         <div className="max-w-4xl mx-auto px-4 flex items-center justify-center space-x-2">
           <Shield className="w-4 h-4 text-vitality-green" />
-          <span>Secured with Azure enterprise-grade encryption • Rush credentials required</span>
+          <span>Internal Rush University System Policy Assistant</span>
         </div>
       </footer>
     </div>
