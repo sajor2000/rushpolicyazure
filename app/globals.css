@@ -25,15 +25,15 @@ body {
   .btn-primary {
     @apply bg-growth-green hover:bg-legacy-green active:bg-legacy-green text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 inline-flex items-center justify-center space-x-2 shadow-md hover:shadow-lg;
   }
-  
+
   .btn-secondary {
     @apply bg-transparent hover:bg-sage active:bg-wash-green border-2 border-growth-green text-growth-green font-semibold py-3 px-6 rounded-xl transition-all duration-200 inline-flex items-center justify-center space-x-2 shadow-sm hover:shadow-md;
   }
-  
+
   .btn-tertiary {
     @apply bg-transparent hover:bg-sage active:bg-wash-green text-growth-green font-medium py-2 px-4 rounded-xl transition-all duration-200 inline-flex items-center justify-center space-x-2;
   }
-  
+
   .btn-text {
     @apply text-growth-green hover:text-legacy-green active:text-legacy-green font-medium py-2 px-2 transition-colors duration-200 inline-flex items-center justify-center space-x-2;
   }
@@ -49,10 +49,33 @@ p, span, div, body {
 }
 
 /* Document-style formatting */
-.document-style {
-  font-family: 'Times New Roman', Times, serif;
-  line-height: 1.6;
-  max-width: none;
+.policy-document {
+  @apply bg-gray-50 border-l-4 border-rush-green p-6 rounded-r-lg;
+}
+
+/* Decorative elements inspired by Rush website */
+.plus-decoration {
+  position: relative;
+}
+
+.plus-decoration::before {
+  content: '+';
+  position: absolute;
+  color: #DFF9EB;
+  font-size: 2rem;
+  font-weight: bold;
+  opacity: 0.3;
+}
+
+/* Enhanced button hover effects */
+.btn-primary {
+  transition: all 0.3s ease;
+  transform: translateY(0);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 99, 65, 0.2);
 }
 
 .document-content {

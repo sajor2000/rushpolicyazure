@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, FileText, AlertCircle, Shield, Loader2, User } from 'lucide-react';
+import { Send, FileText, AlertCircle, Shield, Loader2, User, MessageSquare, Building2, Plus, Zap, Users } from 'lucide-react';
 
 // Define Rush color classes for easier use
 // Primary Palette:
@@ -43,7 +43,7 @@ export default function Home() {
   const parseResponse = (content) => {
     const synthesizedMatch = content.match(/SYNTHESIZED_ANSWER:\s*(.*?)\s*(?=FULL_POLICY_DOCUMENT:|$)/s);
     const documentMatch = content.match(/FULL_POLICY_DOCUMENT:\s*(.*)/s);
-    
+
     return {
       synthesizedAnswer: synthesizedMatch ? synthesizedMatch[1].trim() : '',
       fullDocument: documentMatch ? documentMatch[1].trim() : content
@@ -151,34 +151,128 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="bg-white shadow-md border-b border-rush-gray">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-growth-green to-legacy-green rounded-xl flex items-center justify-center mb-4 shadow-md">
-              <FileText className="w-8 h-8 text-white" />
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center space-x-6">
+              <div className="flex-shrink-0">
+                <div className="flex items-center space-x-3">
+                  <Building2 className="h-10 w-10 text-rush-green" />
+                  <div className="border-l border-gray-300 h-10"></div>
+                  <div>
+                    <h1 className="text-xl font-semibold text-gray-900">Policy Assistant</h1>
+                    <p className="text-sm text-gray-600">Rush University System for Health</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h1 className="text-3xl font-semibold text-rush-black leading-tight">Rush Policy Assistant</h1>
-            <p className="mt-3 text-base text-raw-umber max-w-2xl leading-relaxed">
-              I&apos;m here to help you find and understand all the Rush University System for Health policies, procedures, and guidelines that are available in PolicyTech. Chat with them in a conversational way and get the right answer when you need it.
-            </p>
+            <div className="hidden md:flex items-center space-x-6 text-sm text-gray-600">
+              <span>Policies & Procedures</span>
+              <span>•</span>
+              <span>AI-Powered Search</span>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Information Banner */}
-      <div className="max-w-4xl mx-auto w-full px-4 mt-6">
-        <div className="bg-sage border border-wash-green rounded-xl p-4 flex items-start space-x-3">
-          <Shield className="w-6 h-6 text-growth-green flex-shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <p className="text-rush-black font-medium text-sm leading-relaxed">
-              Secure access to Rush University System for Health PolicyTech database
-            </p>
-            <p className="text-raw-umber text-xs mt-1">
-              All responses are generated from official policy documents. For critical decisions, please verify with the policy owner or your department head.
-            </p>
+      {/* Hero Section */}
+      <section className="bg-white py-20 relative overflow-hidden">
+        {/* Background decorative elements - inspired by Rush website */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-20 text-sage opacity-10">
+            <Plus className="h-8 w-8" />
+          </div>
+          <div className="absolute top-40 right-32 text-sage opacity-10">
+            <Plus className="h-6 w-6" />
+          </div>
+          <div className="absolute bottom-32 left-1/4 text-sage opacity-10">
+            <Plus className="h-10 w-10" />
+          </div>
+          <div className="absolute bottom-20 right-20 text-sage opacity-10">
+            <Plus className="h-7 w-7" />
           </div>
         </div>
-      </div>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-8 leading-tight">
+              Among the nation's best
+              <span className="block text-rush-green">policy guidance.</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed">
+              I'm here to help you find and understand all the Rush University System for Health policies, procedures, and guidelines that are available also in PolicyTech, but here you can chat with them in a conversational way and get the right answer when you need it.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+              <div className="flex items-center text-gray-600">
+                <Shield className="h-6 w-6 mr-3 text-rush-green" />
+                <span className="text-lg">Secure & Compliant</span>
+              </div>
+              <div className="flex items-center text-gray-600">
+                <Zap className="h-6 w-6 mr-3 text-rush-green" />
+                <span className="text-lg">Real-time Search</span>
+              </div>
+              <div className="flex items-center text-gray-600">
+                <Users className="h-6 w-6 mr-3 text-rush-green" />
+                <span className="text-lg">For Rush Staff</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Search Section */}
+      <section className="max-w-4xl mx-auto w-full px-4 py-12">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+          <div className="p-8 border-b border-gray-200">
+            <div className="flex items-center space-x-3 mb-6">
+              <MessageSquare className="h-7 w-7 text-rush-green" />
+              <h2 className="text-2xl font-semibold text-gray-900">Ask a Question</h2>
+            </div>
+            <form onSubmit={sendMessage} className="space-y-6">
+              <div>
+                <textarea
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Ask about any Rush policy, procedure, or guideline..."
+                  className="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-rush-green focus:border-rush-green resize-none text-lg placeholder-gray-500 transition-all duration-200"
+                  rows={4}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  type="submit"
+                  disabled={isLoading || !inputValue.trim()}
+                  className="flex-1 bg-rush-green text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-emerald-700 focus:outline-none focus:ring-3 focus:ring-rush-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin h-6 w-6 mr-3" />
+                      Searching policies...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-6 w-6 mr-3" />
+                      Search
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInputValue('');
+                    setMessages([]); // Clear messages when clearing input
+                  }}
+                  className="px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold text-lg hover:bg-gray-50 focus:outline-none focus:ring-3 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
+                >
+                  Clear
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
 
       {/* Chat Container */}
       <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-8">
@@ -205,7 +299,7 @@ export default function Home() {
                 >
                   {message.type === 'user' ? (
                     <div className="flex items-start space-x-4 justify-end">
-                      <div className="bg-gradient-to-r from-cerulean-blue to-deep-blue rounded-xl px-5 py-4 max-w-md shadow-md">
+                      <div className="bg-gradient-to-br from-cerulean-blue to-deep-blue rounded-xl px-5 py-4 max-w-md shadow-md">
                         <p className="text-white font-medium">{message.content}</p>
                       </div>
                       <div className="w-10 h-10 bg-gradient-to-br from-cerulean-blue to-deep-blue rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
@@ -220,7 +314,7 @@ export default function Home() {
                       <div className="flex-1 space-y-4">
                         {(() => {
                           const { synthesizedAnswer, fullDocument } = parseResponse(message.content);
-                          
+
                           return (
                             <>
                               {/* AI Synthesized Answer */}
@@ -267,9 +361,9 @@ export default function Home() {
                                     <div className="text-xs text-wash-gray space-y-1">
                                       <p>📄 Source: Rush University System PolicyTech Database</p>
                                       <p>🔒 Access Level: Authorized Rush Personnel Only</p>
-                                      <p>📅 Retrieved: {new Date().toLocaleDateString('en-US', { 
-                                        year: 'numeric', 
-                                        month: 'long', 
+                                      <p>📅 Retrieved: {new Date().toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
                                         day: 'numeric',
                                         hour: '2-digit',
                                         minute: '2-digit'
