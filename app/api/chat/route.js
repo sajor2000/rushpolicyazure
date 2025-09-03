@@ -9,6 +9,9 @@ const client = new AzureOpenAI({
 
 const ASSISTANT_ID = process.env.ASSISTANT_ID;
 
+// In-memory thread storage (in production, use Redis or database)
+let conversationThread = null;
+
 export async function POST(request) {
   console.log('API Route called:', new Date().toISOString());
 
@@ -23,18 +26,27 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const { message } = body;
+    const { message, resetConversation } = body;
 
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    console.log('Creating thread for message:', message.substring(0, 50) + '...');
+    // Reset conversation if requested
+    if (resetConversation) {
+      conversationThread = null;
+    }
 
-    const thread = await client.beta.threads.create();
-    console.log('Thread created:', thread.id);
+    // Create new thread only if one doesn't exist
+    if (!conversationThread) {
+      console.log('Creating new conversation thread');
+      conversationThread = await client.beta.threads.create();
+      console.log('Thread created:', conversationThread.id);
+    } else {
+      console.log('Using existing thread:', conversationThread.id);
+    }
 
-    await client.beta.threads.messages.create(thread.id, {
+    await client.beta.threads.messages.create(conversationThread.id, {
       role: "user",
       content: `Please provide information about: "${message}"
 
@@ -47,18 +59,18 @@ FULL_POLICY_DOCUMENT:
 [Provide the complete, exact policy document text as it appears in PolicyTech. Include all original formatting, section numbers, headers, effective dates, policy numbers, and exact language. This should be a verbatim copy of the original document.]`
     });
 
-    const run = await client.beta.threads.runs.create(thread.id, {
+    const run = await client.beta.threads.runs.create(conversationThread.id, {
       assistant_id: ASSISTANT_ID
     });
     console.log('Run started:', run.id);
 
-    let runStatus = await client.beta.threads.runs.retrieve(thread.id, run.id);
+    let runStatus = await client.beta.threads.runs.retrieve(conversationThread.id, run.id);
     let attempts = 0;
     const maxAttempts = 30;
 
     while ((runStatus.status === 'queued' || runStatus.status === 'in_progress') && attempts < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      runStatus = await client.beta.threads.runs.retrieve(thread.id, run.id);
+      runStatus = await client.beta.threads.runs.retrieve(conversationThread.id, run.id);
       attempts++;
 
       if (attempts % 5 === 0) {
@@ -69,7 +81,7 @@ FULL_POLICY_DOCUMENT:
     console.log('Final run status:', runStatus.status);
 
     if (runStatus.status === 'completed') {
-      const messages = await client.beta.threads.messages.list(thread.id);
+      const messages = await client.beta.threads.messages.list(conversationThread.id);
       const assistantMessage = messages.data.find(m => m.role === 'assistant');
 
       if (assistantMessage && assistantMessage.content[0]) {

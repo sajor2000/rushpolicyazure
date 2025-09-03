@@ -12,10 +12,6 @@ const nextConfig = {
       },
     ]
   },
-  // Ensure compatibility with Replit's environment
-  env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
-  },
 }
 
 module.exports = nextConfig

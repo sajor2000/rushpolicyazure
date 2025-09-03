@@ -126,7 +126,10 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({ 
+          message: userMessage,
+          resetConversation: messages.length === 0 // Reset only on first message
+        }),
       });
 
       if (!response.ok) {
@@ -260,9 +263,19 @@ export default function Home() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     setInputValue('');
-                    setMessages([]); // Clear messages when clearing input
+                    setMessages([]);
+                    // Reset conversation on server
+                    try {
+                      await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: 'reset', resetConversation: true })
+                      });
+                    } catch (error) {
+                      console.log('Conversation reset requested');
+                    }
                   }}
                   className="px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold text-lg hover:bg-gray-50 focus:outline-none focus:ring-3 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
                 >
@@ -401,31 +414,6 @@ export default function Home() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Area */}
-          <div className="border-t border-rush-gray p-6 bg-ivory">
-            <form onSubmit={sendMessage} className="flex space-x-3">
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Ask about Rush policies..."
-                className="flex-1 border-2 border-wash-green rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-growth-green focus:border-growth-green transition-all duration-200 bg-white text-rush-black placeholder-wash-gray"
-                disabled={isLoading}
-              />
-              <button
-                type="submit"
-                disabled={isLoading || !inputValue.trim()}
-                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Send className="w-5 h-5" />
-                )}
-                <span className="hidden sm:inline">{isLoading ? 'Sending...' : 'Send'}</span>
-              </button>
-            </form>
-          </div>
         </div>
       </div>
 
