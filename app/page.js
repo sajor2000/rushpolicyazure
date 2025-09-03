@@ -19,7 +19,7 @@ import { Send, FileText, AlertCircle, Shield, Loader2, User } from 'lucide-react
 // Tertiary/Accent Colors:
 // Sage: #DFF9EB (sage)
 // Ivory: #FFFBEC (ivory)
-// Rose: #FDE047 (rose) - Adjusted to yellow for visibility, original was too light
+// Rose: #FDE0DF (rose)
 // Cerulean Blue: #54ADD3 (cerulean-blue)
 // Deep Blue: #00668E (deep-blue)
 // Purple: #694FA0 (purple)

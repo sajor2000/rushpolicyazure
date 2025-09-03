@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* Note: Calibre font would need to be licensed separately from Klim Type Foundry */
 
 html {
   height: 100%;
@@ -11,9 +12,10 @@ html {
 body {
   height: 100%;
   margin: 0;
-  font-family: 'Inter', 'Calibre', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Calibre', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
+  font-weight: 400; /* Calibre Regular for body text */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -37,33 +39,13 @@ body {
   }
 }
 
-/* Rush Typography */
-h1 {
-  @apply font-calibre font-semibold;
+/* Rush Typography - Per Branding Guide */
+h1, h2, h3, h4, h5, h6 {
+  @apply font-calibre font-semibold; /* Calibre Semibold for headers */
 }
 
-h2 {
-  @apply font-calibre font-semibold;
-}
-
-h3 {
-  @apply font-calibre font-semibold;
-}
-
-h4 {
-  @apply font-calibre font-semibold;
-}
-
-h5 {
-  @apply font-calibre font-semibold;
-}
-
-h6 {
-  @apply font-calibre font-semibold;
-}
-
-p, span, div {
-  @apply font-calibre;
+p, span, div, body {
+  @apply font-calibre font-normal; /* Calibre Regular for body text */
 }
 
 /* Document-style formatting */

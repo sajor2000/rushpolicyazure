@@ -33,6 +33,12 @@ module.exports = {
       fontFamily: {
         'calibre': ['Calibre', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
+      fontWeight: {
+        'normal': '400', // Calibre Regular
+        'medium': '500',
+        'semibold': '600', // Calibre Semibold
+        'bold': '700',
+      },
       animation: {
         bounce: 'bounce 1s infinite',
       },
