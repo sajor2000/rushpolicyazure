@@ -224,68 +224,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Search Section */}
-      <section className="max-w-4xl mx-auto w-full px-4 py-12">
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-          <div className="p-8 border-b border-gray-200">
-            <div className="flex items-center space-x-3 mb-6">
-              <MessageSquare className="h-7 w-7 text-rush-green" />
-              <h2 className="text-2xl font-semibold text-gray-900">Ask a Question</h2>
-            </div>
-            <form onSubmit={sendMessage} className="space-y-6">
-              <div>
-                <textarea
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Ask about any Rush policy, procedure, or guideline..."
-                  className="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-rush-green focus:border-rush-green resize-none text-lg placeholder-gray-500 transition-all duration-200"
-                  rows={4}
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  type="submit"
-                  disabled={isLoading || !inputValue.trim()}
-                  className="flex-1 bg-rush-green text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-emerald-700 focus:outline-none focus:ring-3 focus:ring-rush-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="animate-spin h-6 w-6 mr-3" />
-                      Searching policies...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-6 w-6 mr-3" />
-                      Search
-                    </>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    setInputValue('');
-                    setMessages([]);
-                    // Reset conversation on server
-                    try {
-                      await fetch('/api/chat', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: 'reset', resetConversation: true })
-                      });
-                    } catch (error) {
-                      console.log('Conversation reset requested');
-                    }
-                  }}
-                  className="px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold text-lg hover:bg-gray-50 focus:outline-none focus:ring-3 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
-                >
-                  Clear
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </section>
 
       {/* Chat Container */}
       <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-8">
@@ -412,6 +350,51 @@ export default function Home() {
               </div>
             )}
             <div ref={messagesEndRef} />
+          </div>
+
+          {/* Chat Input */}
+          <div className="border-t border-rush-gray p-6 bg-ivory">
+            <form onSubmit={sendMessage} className="flex space-x-3">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="Ask about any Rush policy, procedure, or guideline..."
+                className="flex-1 border-2 border-wash-green rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-growth-green focus:border-growth-green transition-all duration-200 bg-white text-rush-black placeholder-wash-gray text-lg"
+                disabled={isLoading}
+              />
+              <button
+                type="submit"
+                disabled={isLoading || !inputValue.trim()}
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed px-6"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+                <span className="hidden sm:inline ml-2">{isLoading ? 'Searching...' : 'Send'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setInputValue('');
+                  setMessages([]);
+                  try {
+                    await fetch('/api/chat', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ message: 'reset', resetConversation: true })
+                    });
+                  } catch (error) {
+                    console.log('Conversation reset requested');
+                  }
+                }}
+                className="btn-secondary px-4"
+              >
+                Clear
+              </button>
+            </form>
           </div>
 
         </div>
