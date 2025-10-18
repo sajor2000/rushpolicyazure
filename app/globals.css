@@ -44,9 +44,27 @@ body {
   }
 
   .btn-text {
-    @apply text-growth hover:text-legacy active:text-legacy 
-           font-medium py-2 px-2 transition-colors duration-200 
+    @apply text-growth hover:text-legacy active:text-legacy
+           font-medium py-2 px-2 transition-colors duration-200
            inline-flex items-center justify-center space-x-2;
+  }
+
+  /* Skeleton Loader Styles */
+  .skeleton-answer-card {
+    @apply bg-gradient-to-r from-sage/5 to-white
+           border-l-4 border-growth
+           rounded-xl p-5
+           shadow-sm;
+    animation: skeletonPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes skeletonPulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
   }
   
   .btn-accent {
