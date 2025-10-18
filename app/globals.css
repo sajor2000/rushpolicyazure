@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&display=swap');
 
 /* Rush Brand Typography */
 html {
@@ -13,17 +13,18 @@ html {
 body {
   height: 100%;
   margin: 0;
-  font-family: 'Calibre', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Montserrat', 'Source Sans 3', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #5F5858;
+  background-color: #FAFAFA;
 }
 
 /* Rush Brand Button Components */
 @layer components {
   .btn-primary {
-    @apply bg-gradient-to-r from-growth to-legacy hover:from-legacy hover:to-growth 
+    @apply bg-legacy hover:bg-growth 
            text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 
            inline-flex items-center justify-center space-x-2 shadow-md hover:shadow-xl
            transform hover:-translate-y-0.5 active:translate-y-0;

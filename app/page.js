@@ -28,9 +28,9 @@ import { Send, FileText, AlertCircle, Shield, Loader2, User, MessageSquare, Buil
  */
 
 const SUGGESTED_PROMPTS = [
-  { icon: Clock, text: "What is the vacation policy?", category: "Time Off" },
-  { icon: Shield, text: "Tell me about HIPAA compliance requirements", category: "Compliance" },
-  { icon: Users, text: "What's the remote work policy?", category: "Work Policies" },
+  { icon: Clock, text: "How do I request time off?", category: "Time Off" },
+  { icon: Shield, text: "Help me understand HIPAA compliance", category: "Compliance" },
+  { icon: Users, text: "What are our remote work options?", category: "Work Policies" },
   { icon: TrendingUp, text: "Employee benefits overview", category: "Benefits" },
 ];
 
@@ -243,7 +243,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-sage/30 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-white via-sand/10 to-sage/30 flex flex-col">
       {/* Toast Notification */}
       {toast && (
         <div 
@@ -268,7 +268,7 @@ export default function Home() {
       )}
 
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 sticky top-0 z-40">
+      <header className="bg-white/90 backdrop-blur-md shadow-sm border-b border-rush-gray/30 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center space-x-6">
@@ -293,7 +293,7 @@ export default function Home() {
               </div>
               <div className="flex items-center space-x-2">
                 <kbd className="px-2 py-1 text-xs font-mono bg-sage border border-growth/30 rounded text-legacy">⌘K</kbd>
-                <span className="text-xs text-rush-gray">to focus</span>
+                <span className="text-xs text-rush-black">to focus</span>
               </div>
             </div>
           </div>
@@ -313,7 +313,7 @@ export default function Home() {
             Rush Policy Assistant
           </h1>
           <p className="text-lg text-rush-black mb-8 max-w-2xl mx-auto leading-relaxed voice-accessible font-georgia">
-            Search and chat with Rush University System for Health policies and procedures. Get instant answers to policy questions in a conversational format.
+            We're here to help you find the policies and information you need. Ask questions in your own words and get clear, reliable answers from our policy library.
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm text-rush-black">
             <div className="flex items-center space-x-2 transition-transform hover:scale-105 px-3 py-1.5 bg-sage/30 rounded-full">
@@ -334,13 +334,13 @@ export default function Home() {
 
       {/* Chat Container */}
       <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 h-full max-h-[700px] flex flex-col overflow-hidden backdrop-blur-sm">
+        <div className="bg-white rounded-2xl shadow-xl border-2 border-rush-gray/20 h-full max-h-[700px] flex flex-col overflow-hidden backdrop-blur-sm">
           {/* Chat Header */}
           <div className="border-b border-rush-gray/30 p-6 bg-gradient-to-r from-sage/20 to-sand/20">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-semibold text-legacy mb-1">Policy Assistant Chat</h2>
-                <p className="text-sm text-rush-black font-georgia voice-accessible">Ask me anything about Rush University policies</p>
+                <p className="text-sm text-rush-black font-georgia voice-accessible">Ask questions in your own words - we're here to help</p>
               </div>
               <div className="flex items-center space-x-2 px-3 py-1 bg-white rounded-full border border-growth/20">
                 <div className="w-2 h-2 bg-growth rounded-full animate-pulse"></div>
@@ -357,8 +357,8 @@ export default function Home() {
                   <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-growth/20 to-sage rounded-2xl mb-4 border-2 border-vitality/30">
                     <FileText className="w-10 h-10 text-growth" />
                   </div>
-                  <p className="text-xl font-semibold text-legacy mb-2 voice-inventive">Ask me about any Rush University System policy</p>
-                  <p className="text-sm text-rush-black max-w-md mx-auto font-georgia voice-accessible">Start a conversation by selecting a suggested prompt below or type your own question</p>
+                  <p className="text-xl font-semibold text-legacy mb-2 voice-inventive">Let's find the policy answers you need</p>
+                  <p className="text-sm text-rush-black max-w-md mx-auto font-georgia voice-accessible">Choose a topic below or ask your own question - we're here to help</p>
                 </div>
 
                 {/* Suggested Prompts */}
@@ -374,7 +374,7 @@ export default function Home() {
                           <prompt.icon className="w-5 h-5 text-growth" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-growth mb-1">{prompt.category}</p>
+                          <p className="text-xs font-semibold text-legacy mb-1">{prompt.category}</p>
                           <p className="text-sm text-rush-black font-medium line-clamp-2 voice-inclusive">{prompt.text}</p>
                         </div>
                       </div>
@@ -463,27 +463,28 @@ export default function Home() {
                               )}
 
                               {/* Full Policy Document */}
-                              <div className="bg-white border-2 border-gray-300 shadow-lg overflow-hidden rounded-2xl hover:shadow-xl transition-shadow">
+                              <div className="bg-white border-2 border-rush-gray/30 shadow-lg overflow-hidden rounded-2xl hover:shadow-xl transition-shadow">
                                 {/* Document Header */}
-                                <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-300">
+                                <div className="bg-gradient-to-r from-sand/20 to-sage/20 px-6 py-4 border-b border-rush-gray/30">
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-2">
-                                      <FileText className="w-5 h-5 text-gray-600" />
-                                      <h3 className="font-semibold text-gray-800">Rush University System for Health Policy Document</h3>
+                                      <FileText className="w-5 h-5 text-legacy" />
+                                      <h3 className="font-semibold text-legacy">Rush University System for Health Policy Document</h3>
                                     </div>
                                     <button
                                       onClick={() => copyToClipboard(fullDocument, `doc-${index}`)}
-                                      className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                                      className="p-2 hover:bg-sage/30 rounded-lg transition-colors"
                                       title="Copy document"
+                                      aria-label="Copy full document to clipboard"
                                     >
                                       {copiedIndex === `doc-${index}` ? (
-                                        <CheckCheck className="w-4 h-4 text-growth-green" />
+                                        <CheckCheck className="w-4 h-4 text-growth" aria-hidden="true" />
                                       ) : (
-                                        <Copy className="w-4 h-4 text-gray-600" />
+                                        <Copy className="w-4 h-4 text-legacy" aria-hidden="true" />
                                       )}
                                     </button>
                                   </div>
-                                  <p className="text-xs text-gray-600 mt-1">PolicyTech Database - Official Document</p>
+                                  <p className="text-xs text-rush-black mt-1 font-georgia">PolicyTech Database - Official Document</p>
                                 </div>
 
                                 {/* Document Content - Clean White Document Format */}
@@ -549,13 +550,13 @@ export default function Home() {
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Ask about any Rush policy, procedure, or guideline..."
+                  placeholder="Type your question here - we're ready to help..."
                   className="w-full border-2 border-rush-gray/40 rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-growth focus:border-growth transition-all duration-200 bg-white text-rush-black placeholder-rush-gray text-base shadow-sm hover:border-growth/50 font-georgia"
                   disabled={isLoading}
                   aria-label="Ask a policy question"
                 />
                 {inputValue && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-rush-gray font-medium">
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-rush-black font-medium">
                     Press Enter ↵
                   </div>
                 )}
@@ -590,11 +591,11 @@ export default function Home() {
             </form>
             <div className="mt-3 flex items-center justify-between text-xs">
               <div className="flex items-center space-x-4 text-rush-black">
-                <span className="font-georgia">💡 Tip: Use ⌘K to focus the input</span>
+                <span className="font-georgia">💡 Quick tip: Press ⌘K to jump to the search box</span>
               </div>
               <div className="flex items-center space-x-2 px-2 py-1 bg-white rounded-full border border-growth/20">
                 <div className="w-1.5 h-1.5 bg-growth rounded-full animate-pulse"></div>
-                <span className="text-legacy font-medium">Ready to assist</span>
+                <span className="text-legacy font-medium">Ready to help</span>
               </div>
             </div>
           </div>
@@ -609,7 +610,7 @@ export default function Home() {
             <span className="font-semibold text-legacy">Internal Rush University System Policy Assistant</span>
           </div>
           <p className="text-xs text-rush-black font-georgia">Powered by Azure OpenAI GPT-4 • Secure & Confidential</p>
-          <div className="mt-2 flex items-center justify-center space-x-3 text-xs text-rush-gray">
+          <div className="mt-2 flex items-center justify-center space-x-3 text-xs text-rush-black">
             <span>Inclusive</span>
             <span>•</span>
             <span>Invested</span>

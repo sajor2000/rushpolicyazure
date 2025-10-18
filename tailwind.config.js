@@ -38,9 +38,9 @@ module.exports = {
         'rush-indigo': '#1E1869',
       },
       fontFamily: {
-        'calibre': ['Calibre', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        'calibre': ['Montserrat', 'Source Sans 3', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         'georgia': ['Georgia', 'Times New Roman', 'serif'],
-        'sans': ['Calibre', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        'sans': ['Montserrat', 'Source Sans 3', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
         'serif': ['Georgia', 'Times New Roman', 'serif'],
       },
       fontWeight: {
