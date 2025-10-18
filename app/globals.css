@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-/* Note: Calibre font would need to be licensed separately from Klim Type Foundry */
 
 html {
   height: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -15,7 +15,7 @@ body {
   font-family: 'Calibre', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
-  font-weight: 400; /* Calibre Regular for body text */
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -23,123 +23,123 @@ body {
 /* Rush Button Components */
 @layer components {
   .btn-primary {
-    @apply bg-growth-green hover:bg-legacy-green active:bg-legacy-green text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 inline-flex items-center justify-center space-x-2 shadow-md hover:shadow-lg;
+    @apply bg-gradient-to-r from-growth-green to-legacy-green hover:from-legacy-green hover:to-growth-green 
+           text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 
+           inline-flex items-center justify-center space-x-2 shadow-md hover:shadow-xl
+           transform hover:-translate-y-0.5 active:translate-y-0;
   }
 
   .btn-secondary {
-    @apply bg-transparent hover:bg-sage active:bg-wash-green border-2 border-growth-green text-growth-green font-semibold py-3 px-6 rounded-xl transition-all duration-200 inline-flex items-center justify-center space-x-2 shadow-sm hover:shadow-md;
+    @apply bg-white hover:bg-sage/30 active:bg-wash-green/30 
+           border-2 border-growth-green text-growth-green font-semibold py-3 px-6 
+           rounded-xl transition-all duration-300 inline-flex items-center justify-center space-x-2 
+           shadow-sm hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0;
   }
 
   .btn-tertiary {
-    @apply bg-transparent hover:bg-sage active:bg-wash-green text-growth-green font-medium py-2 px-4 rounded-xl transition-all duration-200 inline-flex items-center justify-center space-x-2;
+    @apply bg-transparent hover:bg-sage/50 active:bg-wash-green 
+           text-growth-green font-medium py-2 px-4 rounded-xl 
+           transition-all duration-200 inline-flex items-center justify-center space-x-2;
   }
 
   .btn-text {
-    @apply text-growth-green hover:text-legacy-green active:text-legacy-green font-medium py-2 px-2 transition-colors duration-200 inline-flex items-center justify-center space-x-2;
+    @apply text-growth-green hover:text-legacy-green active:text-legacy-green 
+           font-medium py-2 px-2 transition-colors duration-200 
+           inline-flex items-center justify-center space-x-2;
   }
 }
 
-/* Rush Typography - Per Branding Guide */
+/* Rush Typography */
 h1, h2, h3, h4, h5, h6 {
-  @apply font-calibre font-semibold; /* Calibre Semibold for headers */
+  @apply font-semibold;
 }
 
 p, span, div, body {
-  @apply font-calibre font-normal; /* Calibre Regular for body text */
+  @apply font-normal;
+}
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Apply animations */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.4s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
 }
 
 /* Document-style formatting */
 .policy-document {
-  @apply bg-white border border-gray-300 p-8 rounded-lg shadow-sm;
+  @apply bg-white border border-gray-300 rounded-lg shadow-sm;
   font-family: 'Times New Roman', Times, serif;
   line-height: 1.6;
   color: #000;
 }
 
-/* Decorative elements inspired by Rush website */
-.plus-decoration {
-  position: relative;
-}
-
-.plus-decoration::before {
-  content: '+';
-  position: absolute;
-  color: #DFF9EB;
-  font-size: 2rem;
-  font-weight: bold;
-  opacity: 0.3;
-}
-
-/* Enhanced button hover effects */
-.btn-primary {
-  transition: all 0.3s ease;
-  transform: translateY(0);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 99, 65, 0.2);
-}
-
-.document-content {
-  font-size: 12px;
-  color: #000;
-  line-height: 1.5;
-  font-family: 'Times New Roman', Times, serif;
-}
-
-.document-content h1 {
-  font-size: 20px;
-  font-weight: bold;
-  text-align: center;
-  margin: 24px 0 16px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #006332;
-}
-
-.document-content h2 {
-  font-size: 18px;
-  font-weight: bold;
-  margin: 20px 0 12px 0;
-  color: #006332;
-  border-bottom: 2px solid #00A66C;
-  padding-bottom: 4px;
-}
-
-.document-content h3 {
-  font-size: 16px;
-  font-weight: bold;
-  margin: 16px 0 8px 0;
-  color: #00A66C;
-}
-
-.document-content p {
-  margin-bottom: 8px;
-  text-align: justify;
-}
-
-.document-content ul, .document-content ol {
-  margin: 8px 0;
-  padding-left: 20px;
-}
-
-.document-content li {
-  margin-bottom: 4px;
-}
-
 /* PolicyTech Document Reproduction Styling */
-.policy-document {
-  font-family: 'Times New Roman', Times, serif;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #000;
-  background: white;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* Policy document header styling */
 .policy-header-info {
   font-size: 11px;
   color: #333;
@@ -216,42 +216,100 @@ p, span, div, body {
   text-align: justify;
 }
 
-/* Policy-specific formatting */
-.policy-section {
-  border-left: 3px solid #006341;
-  padding-left: 12px;
-  margin: 12px 0;
-  background-color: #f8f9fa;
-  padding: 8px 12px;
+/* Hover effects */
+.hover-lift {
+  transition: all 0.3s ease;
 }
 
-.effective-date {
-  font-style: italic;
-  color: #666;
-  font-size: 11px;
-  text-align: right;
-  margin-top: 20px;
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
-.policy-number {
-  font-weight: bold;
-  color: #000;
-  font-size: 12px;
-  text-align: center;
-  margin-bottom: 16px;
+/* Focus states for accessibility */
+input:focus,
+button:focus,
+a:focus {
+  outline: 2px solid #00A66C;
+  outline-offset: 2px;
 }
 
-.policy-header {
-  text-align: center;
-  border-bottom: 1px solid #000;
-  padding-bottom: 8px;
-  margin-bottom: 16px;
+/* Smooth transitions */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.policy-footer {
-  border-top: 1px solid #000;
-  padding-top: 8px;
-  margin-top: 20px;
-  text-align: center;
-  font-size: 10px;
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00A66C;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #006332;
+}
+
+/* Loading skeleton */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(to right, #f0f0f0 4%, #e0e0e0 25%, #f0f0f0 36%);
+  background-size: 1000px 100%;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .btn-primary,
+  .btn-secondary {
+    @apply py-2.5 px-4 text-sm;
+  }
+  
+  h1 {
+    @apply text-2xl;
+  }
+  
+  h2 {
+    @apply text-xl;
+  }
+}
+
+/* Accessibility: Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .policy-document {
+    border: none;
+    box-shadow: none;
+    page-break-inside: avoid;
+  }
 }
