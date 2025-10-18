@@ -96,7 +96,7 @@ Required environment variables:
 
 ### Functionality
 - ✅ Azure OpenAI GPT-4 integration
-- ✅ 800+ policy document search
+- ✅ 1300+ PolicyTech document search
 - ✅ Real-time chat with streaming
 - ✅ Copy functionality
 - ✅ Toast notifications

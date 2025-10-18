@@ -1,6 +1,6 @@
 # Overview
 
-The Rush Policy Chat Assistant is a Next.js application that provides AI-powered policy document queries for Rush University Medical Center staff. This is a beta demonstration built to showcase intelligent policy search capabilities using Azure OpenAI GPT-4. The application allows users to search through 800+ policy documents using natural language queries and receive both synthesized answers and full policy details.
+The Rush Policy Chat Assistant is a Next.js application that provides AI-powered policy document queries for Rush University Medical Center staff. This is a beta demonstration built to showcase intelligent policy search capabilities using Azure OpenAI GPT-4. The application allows users to search through 1300+ PolicyTech policy documents using natural language queries and receive both synthesized answers and full policy details.
 
 **Latest Update (October 18, 2025)**: Complete Rush University brand implementation with official color palette, modern web typography, WCAG AA accessibility compliance, and brand voice integration. The application now fully reflects Rush's visual identity and personality (Inclusive, Invested, Inventive, Accessible) across every interaction.
 
@@ -68,7 +68,7 @@ The backend implements a **stateless design** with in-memory thread storage for 
 The application uses:
 
 - **Azure OpenAI Assistants API** for conversation management and policy document retrieval
-- **Vector store** containing 800+ Rush University policy documents for semantic search
+- **Vector store** containing 1300+ Rush University PolicyTech documents for semantic search
 - **Thread-based conversations** maintaining context across multiple queries
 - **No persistent user data storage** - conversations are ephemeral for security
 

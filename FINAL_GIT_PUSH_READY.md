@@ -98,7 +98,7 @@ ASSISTANT_ID=your_assistant_id_here
 - ✅ Brand voice integration (Inclusive, Invested, Inventive, Accessible)
 
 ### Production Features
-- ✅ 800+ policy document search
+- ✅ 1300+ PolicyTech document search
 - ✅ Azure OpenAI GPT-4 integration
 - ✅ Real-time chat interface
 - ✅ Copy functionality, toast notifications
@@ -156,7 +156,7 @@ Features:
 - WCAG AA accessible design (all contrast ratios exceed 4.5:1)
 - Professional typography (Montserrat, Source Sans 3, Georgia)
 - Brand voice integration (Inclusive, Invested, Inventive, Accessible)
-- Azure OpenAI GPT-4 policy search (800+ documents)
+- Azure OpenAI GPT-4 policy search (1300+ PolicyTech documents)
 - Real-time chat interface with streaming responses
 - Copy functionality, keyboard shortcuts, toast notifications
 - Mobile-responsive design
@@ -188,7 +188,7 @@ A **production-ready** Rush University Policy Assistant with:
 
 1. **Authentic Branding** - Official Rush logo and complete brand guidelines
 2. **Accessibility Excellence** - WCAG AA compliant throughout
-3. **Enterprise AI** - Azure OpenAI GPT-4 with 800+ policy documents
+3. **Enterprise AI** - Azure OpenAI GPT-4 with 1300+ PolicyTech documents
 4. **Professional UX** - Modern, polished interface with smooth interactions
 5. **Complete Documentation** - Setup guides, deployment options, security practices
 6. **Clean Codebase** - Well-organized, commented, following best practices

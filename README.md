@@ -23,7 +23,7 @@ An AI-powered chat interface for Rush University Medical Center staff to query o
 - Focus states for all interactive elements
 
 ### 🚀 Production Features
-- **800+ Policy Documents**: Semantic search through Rush University policies
+- **1300+ PolicyTech Documents**: Semantic search through Rush University policies from PolicyTech
 - **AI-Powered Responses**: Azure OpenAI GPT-4 with Assistants API
 - **Real-time Chat**: Streaming responses with conversation context
 - **Copy Functionality**: One-click copy for responses and documents

@@ -131,7 +131,7 @@ git push -u origin main
 - Brand voice integration (Inclusive, Invested, Inventive, Accessible)
 
 **Production-Ready Features:**
-- 800+ policy document search with Azure OpenAI GPT-4
+- 1300+ PolicyTech document search with Azure OpenAI GPT-4
 - Real-time chat interface with conversation context
 - Copy functionality, toast notifications, keyboard shortcuts
 - Mobile-responsive design

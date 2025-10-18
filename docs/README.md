@@ -3,7 +3,7 @@
 
 > **⚠️ IMPORTANT NOTICE: This is a DEMO VERSION built by Juan C. Rojas MD, MS for demonstration purposes only. This beta version uses secure Azure resources and is not intended for production use.**
 
-An AI-powered chat interface for Rush University employees to query official policy documents. Built with Next.js and Azure OpenAI, this application provides instant access to over 800 policy documents with intelligent search and interpretation capabilities.
+An AI-powered chat interface for Rush University employees to query official policy documents. Built with Next.js and Azure OpenAI, this application provides instant access to over 1300 PolicyTech documents with intelligent search and interpretation capabilities.
 
 ![Rush Policy Assistant](https://img.shields.io/badge/Rush-Policy%20Assistant-006341)
 ![Status](https://img.shields.io/badge/Status-Beta%20Demo-orange)
@@ -24,7 +24,7 @@ This beta demonstration:
 ## 🏥 Features
 
 - **Intelligent Policy Search**: Natural language queries to find relevant policies
-- **800+ Policy Documents**: Comprehensive coverage of Rush University policies
+- **1300+ PolicyTech Documents**: Comprehensive coverage of Rush University policies from PolicyTech
 - **Real-time Responses**: Powered by Azure OpenAI GPT-4
 - **Secure Authentication**: API key-based access control
 - **Rush University Branded**: Official Rush green color scheme and branding

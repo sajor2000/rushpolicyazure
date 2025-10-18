@@ -321,12 +321,12 @@ export default function Home() {
             Rush Policy Assistant
           </h1>
           <p className="text-lg text-rush-black mb-8 max-w-2xl mx-auto leading-relaxed voice-accessible font-georgia">
-            We're here to help you find the policies and information you need. Ask questions in your own words and get clear, reliable answers from our policy library.
+            We're here to help you find the policies and information you need. Ask questions in your own words and get clear, reliable answers from over 1300 PolicyTech documents.
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm text-rush-black">
             <div className="flex items-center space-x-2 transition-transform hover:scale-105 px-3 py-1.5 bg-sage/30 rounded-full">
               <FileText className="h-4 w-4 text-growth" />
-              <span className="font-medium">800+ Policy Documents</span>
+              <span className="font-medium">1300+ PolicyTech Documents</span>
             </div>
             <div className="flex items-center space-x-2 transition-transform hover:scale-105 px-3 py-1.5 bg-sand/30 rounded-full">
               <MessageSquare className="h-4 w-4 text-navy" />
@@ -334,7 +334,7 @@ export default function Home() {
             </div>
             <div className="flex items-center space-x-2 transition-transform hover:scale-105 px-3 py-1.5 bg-blush/30 rounded-full">
               <Zap className="h-4 w-4 text-gold" />
-              <span className="font-medium">Instant Responses</span>
+              <span className="font-medium">Instant AI Responses</span>
             </div>
           </div>
         </div>
