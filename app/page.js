@@ -2,28 +2,30 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, FileText, AlertCircle, Shield, Loader2, User, MessageSquare, Building2, Plus, Zap, Users, Copy, CheckCheck, Sparkles, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
 
-// Define Rush color classes for easier use
-// Primary Palette:
-// Vitality Green: #5FEEA2
-// Growth Green: #00A66C
-// Legacy Green: #006332
-// Black: #0C0C0C (rush-black)
-
-// Secondary Palette:
-// Green: #00A66C (growth-green)
-// Wash Green: #9AEFC2 (wash-green)
-// Gray: #EAEAEA (rush-gray)
-// Wash Gray: #A59F9F (wash-gray)
-// Raw Umber: #5F5858 (raw-umber)
-
-// Tertiary/Accent Colors:
-// Sage: #DFF9EB (sage)
-// Ivory: #FFFBEC (ivory)
-// Rose: #FDE0DF (rose)
-// Cerulean Blue: #54ADD3 (cerulean-blue)
-// Deep Blue: #00668E (deep-blue)
-// Purple: #694FA0 (purple)
-// Indigo: #1E1869 (indigo)
+/**
+ * Rush University Medical Center - Official Brand Color Palette
+ * 
+ * Primary Colors:
+ * - Legacy: #006332 (Primary green - represents heritage and trust)
+ * - Growth: #30AE6E (Vibrant green - represents progress)
+ * - Vitality: #5FEEA2 (Bright green - represents energy)
+ * - Sage: #DFF9EB (Soft green - represents calm and care)
+ * 
+ * Accent Colors:
+ * - Gold: #FFC60B (Optimism and excellence)
+ * - Sky Blue: #54ADD3 (Innovation and clarity)
+ * - Navy: #005D83 (Trust and professionalism)
+ * - Purple: #2D1D4E (Wisdom and dignity)
+ * - Violet: #6C43B9 (Creativity and vision)
+ * - Blush: #FFE3E0 (Warmth and compassion)
+ * - Sand: #F2DBB3 (Comfort and accessibility)
+ * 
+ * Neutrals:
+ * - Rush Black: #5F5858 (Primary text)
+ * - Rush Gray: #AFAEAF (Secondary text)
+ * 
+ * Brand Voice: Inclusive, Invested, Inventive, Accessible
+ */
 
 const SUGGESTED_PROMPTS = [
   { icon: Clock, text: "What is the vacation policy?", category: "Time Off" },
@@ -250,8 +252,8 @@ export default function Home() {
           aria-atomic="true"
           className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ease-out ${
             toast.type === 'success' 
-              ? 'bg-growth-green text-white' 
-              : 'bg-rose text-red-700'
+              ? 'bg-growth text-white' 
+              : 'bg-blush border-2 border-red-500 text-red-700'
           } animate-slide-in-right`}
         >
           <div className="flex items-center space-x-2">
@@ -273,25 +275,25 @@ export default function Home() {
               <div className="flex-shrink-0">
                 <div className="flex items-center space-x-3">
                   <div className="relative">
-                    <Building2 className="h-10 w-10 text-growth-green" />
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-vitality-green rounded-full animate-pulse"></div>
+                    <Building2 className="h-10 w-10 text-growth" />
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-vitality rounded-full animate-pulse"></div>
                   </div>
-                  <div className="border-l border-gray-300 h-10"></div>
+                  <div className="border-l border-rush-gray h-10"></div>
                   <div>
-                    <h1 className="text-xl font-semibold text-gray-900">Policy Assistant</h1>
-                    <p className="text-sm text-gray-600">Rush University System for Health</p>
+                    <h1 className="text-xl font-semibold text-legacy">Policy Assistant</h1>
+                    <p className="text-sm text-rush-black font-georgia">Rush University System for Health</p>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="hidden md:flex items-center space-x-6 text-sm text-gray-600">
-              <div className="flex items-center space-x-2 px-3 py-1.5 bg-sage/50 rounded-full">
-                <Sparkles className="w-4 h-4 text-growth-green" />
-                <span>AI-Powered</span>
+            <div className="hidden md:flex items-center space-x-6 text-sm text-rush-black">
+              <div className="flex items-center space-x-2 px-3 py-1.5 bg-sage/50 rounded-full border border-growth/20">
+                <Sparkles className="w-4 h-4 text-growth" />
+                <span className="font-medium">AI-Powered</span>
               </div>
               <div className="flex items-center space-x-2">
-                <kbd className="px-2 py-1 text-xs font-mono bg-gray-100 border border-gray-300 rounded">⌘K</kbd>
-                <span className="text-xs text-gray-500">to focus</span>
+                <kbd className="px-2 py-1 text-xs font-mono bg-sage border border-growth/30 rounded text-legacy">⌘K</kbd>
+                <span className="text-xs text-rush-gray">to focus</span>
               </div>
             </div>
           </div>
@@ -299,32 +301,32 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-white via-sage/20 to-ivory/30 py-12 border-b border-gray-200">
+      <section className="bg-gradient-to-r from-white via-sage/30 to-blush/20 py-12 border-b border-rush-gray/30">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-block mb-4">
-            <div className="flex items-center space-x-2 px-4 py-2 bg-white rounded-full shadow-md border border-growth-green/20">
-              <Shield className="h-4 w-4 text-growth-green" />
-              <span className="text-sm font-medium text-growth-green">Internal Use Only</span>
+            <div className="flex items-center space-x-2 px-4 py-2 bg-white rounded-full shadow-md border border-growth/30">
+              <Shield className="h-4 w-4 text-growth" />
+              <span className="text-sm font-semibold text-legacy">Internal Use Only</span>
             </div>
           </div>
-          <h1 className="text-4xl font-semibold text-rush-black mb-4 tracking-tight">
+          <h1 className="text-4xl font-bold text-legacy mb-4 tracking-tight voice-inventive">
             Rush Policy Assistant
           </h1>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-rush-black mb-8 max-w-2xl mx-auto leading-relaxed voice-accessible font-georgia">
             Search and chat with Rush University System for Health policies and procedures. Get instant answers to policy questions in a conversational format.
           </p>
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
-            <div className="flex items-center space-x-2 transition-transform hover:scale-105">
-              <FileText className="h-4 w-4 text-growth-green" />
-              <span>800+ Policy Documents</span>
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-rush-black">
+            <div className="flex items-center space-x-2 transition-transform hover:scale-105 px-3 py-1.5 bg-sage/30 rounded-full">
+              <FileText className="h-4 w-4 text-growth" />
+              <span className="font-medium">800+ Policy Documents</span>
             </div>
-            <div className="flex items-center space-x-2 transition-transform hover:scale-105">
-              <MessageSquare className="h-4 w-4 text-growth-green" />
-              <span>Natural Language Search</span>
+            <div className="flex items-center space-x-2 transition-transform hover:scale-105 px-3 py-1.5 bg-sand/30 rounded-full">
+              <MessageSquare className="h-4 w-4 text-navy" />
+              <span className="font-medium">Natural Language Search</span>
             </div>
-            <div className="flex items-center space-x-2 transition-transform hover:scale-105">
-              <Zap className="h-4 w-4 text-growth-green" />
-              <span>Instant Responses</span>
+            <div className="flex items-center space-x-2 transition-transform hover:scale-105 px-3 py-1.5 bg-blush/30 rounded-full">
+              <Zap className="h-4 w-4 text-gold" />
+              <span className="font-medium">Instant Responses</span>
             </div>
           </div>
         </div>
@@ -334,15 +336,15 @@ export default function Home() {
       <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 h-full max-h-[700px] flex flex-col overflow-hidden backdrop-blur-sm">
           {/* Chat Header */}
-          <div className="border-b border-gray-200 p-6 bg-gradient-to-r from-sage/30 to-ivory/30">
+          <div className="border-b border-rush-gray/30 p-6 bg-gradient-to-r from-sage/20 to-sand/20">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-rush-black mb-1">Policy Assistant Chat</h2>
-                <p className="text-sm text-gray-600">Ask me anything about Rush University policies</p>
+                <h2 className="text-xl font-semibold text-legacy mb-1">Policy Assistant Chat</h2>
+                <p className="text-sm text-rush-black font-georgia voice-accessible">Ask me anything about Rush University policies</p>
               </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-growth-green rounded-full animate-pulse"></div>
-                <span className="text-xs text-gray-500">Online</span>
+              <div className="flex items-center space-x-2 px-3 py-1 bg-white rounded-full border border-growth/20">
+                <div className="w-2 h-2 bg-growth rounded-full animate-pulse"></div>
+                <span className="text-xs text-legacy font-medium">Online</span>
               </div>
             </div>
           </div>
@@ -352,11 +354,11 @@ export default function Home() {
             {messages.length === 0 ? (
               <div className="text-center mt-8">
                 <div className="mb-8">
-                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-growth-green/10 to-sage rounded-2xl mb-4">
-                    <FileText className="w-10 h-10 text-growth-green" />
+                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-growth/20 to-sage rounded-2xl mb-4 border-2 border-vitality/30">
+                    <FileText className="w-10 h-10 text-growth" />
                   </div>
-                  <p className="text-xl font-semibold text-rush-black mb-2">Ask me about any Rush University System policy</p>
-                  <p className="text-sm text-gray-500 max-w-md mx-auto">Start a conversation by selecting a suggested prompt below or type your own question</p>
+                  <p className="text-xl font-semibold text-legacy mb-2 voice-inventive">Ask me about any Rush University System policy</p>
+                  <p className="text-sm text-rush-black max-w-md mx-auto font-georgia voice-accessible">Start a conversation by selecting a suggested prompt below or type your own question</p>
                 </div>
 
                 {/* Suggested Prompts */}
@@ -365,15 +367,15 @@ export default function Home() {
                     <button
                       key={index}
                       onClick={() => sendMessage(null, prompt.text)}
-                      className="group p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-growth-green hover:bg-sage/10 transition-all duration-200 text-left transform hover:scale-105 hover:shadow-md"
+                      className="group p-4 bg-white border-2 border-rush-gray/30 rounded-xl hover:border-growth hover:bg-sage/20 transition-all duration-200 text-left transform hover:scale-105 hover:shadow-lg"
                     >
                       <div className="flex items-start space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-growth-green/10 to-sage rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-growth-green/20 group-hover:to-sage/50 transition-colors">
-                          <prompt.icon className="w-5 h-5 text-growth-green" />
+                        <div className="w-10 h-10 bg-gradient-to-br from-growth/10 to-vitality/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-growth/30 group-hover:to-vitality/40 transition-colors border border-growth/20">
+                          <prompt.icon className="w-5 h-5 text-growth" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-growth-green mb-1">{prompt.category}</p>
-                          <p className="text-sm text-gray-700 font-medium line-clamp-2">{prompt.text}</p>
+                          <p className="text-xs font-semibold text-growth mb-1">{prompt.category}</p>
+                          <p className="text-sm text-rush-black font-medium line-clamp-2 voice-inclusive">{prompt.text}</p>
                         </div>
                       </div>
                     </button>
@@ -389,33 +391,33 @@ export default function Home() {
                 >
                   {message.type === 'user' ? (
                     <div className="flex items-start space-x-3 justify-end max-w-2xl">
-                      <div className="bg-gradient-to-br from-cerulean-blue to-deep-blue rounded-2xl px-5 py-4 shadow-lg hover:shadow-xl transition-shadow">
-                        <p className="text-white font-medium">{message.content}</p>
-                        <p className="text-blue-100 text-xs mt-2">{message.timestamp?.toLocaleTimeString()}</p>
+                      <div className="bg-gradient-to-br from-navy to-purple rounded-2xl px-5 py-4 shadow-lg hover:shadow-xl transition-shadow border border-navy/20">
+                        <p className="text-white font-medium voice-inclusive">{message.content}</p>
+                        <p className="text-sky-blue/80 text-xs mt-2 font-georgia">{message.timestamp?.toLocaleTimeString()}</p>
                       </div>
-                      <div className="w-10 h-10 bg-gradient-to-br from-cerulean-blue to-deep-blue rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                      <div className="w-10 h-10 bg-gradient-to-br from-navy to-purple rounded-xl flex items-center justify-center flex-shrink-0 shadow-md border border-violet/30">
                         <User className="w-5 h-5 text-white" />
                       </div>
                     </div>
                   ) : message.type === 'error' ? (
                     <div className="flex items-start space-x-3 w-full max-w-3xl">
-                      <div className="w-10 h-10 bg-gradient-to-br from-rose to-red-400 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blush to-red-400 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
                         <AlertTriangle className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1">
-                        <div className="bg-rose/20 border-2 border-rose rounded-2xl px-6 py-4 shadow-md">
+                        <div className="bg-blush/40 border-2 border-red-400 rounded-2xl px-6 py-4 shadow-md">
                           <div className="flex items-center space-x-2 mb-2">
-                            <AlertCircle className="w-5 h-5 text-red-600" />
+                            <AlertCircle className="w-5 h-5 text-red-700" />
                             <h3 className="font-semibold text-red-900">Error</h3>
                           </div>
-                          <p className="text-red-800 leading-relaxed">{message.content}</p>
-                          <p className="text-red-600 text-xs mt-2">{message.timestamp?.toLocaleTimeString()}</p>
+                          <p className="text-red-900 leading-relaxed voice-accessible font-georgia">{message.content}</p>
+                          <p className="text-red-700 text-xs mt-2">{message.timestamp?.toLocaleTimeString()}</p>
                         </div>
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-start space-x-3 w-full max-w-3xl">
-                      <div className="w-10 h-10 bg-gradient-to-br from-growth-green to-legacy-green rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                      <div className="w-10 h-10 bg-gradient-to-br from-growth to-legacy rounded-xl flex items-center justify-center flex-shrink-0 shadow-md border border-vitality/40">
                         <FileText className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 space-y-4">
@@ -426,29 +428,30 @@ export default function Home() {
                             <>
                               {/* AI Synthesized Answer */}
                               {synthesizedAnswer && (
-                                <div className="bg-white rounded-2xl shadow-lg border border-cerulean-blue/30 overflow-hidden hover:shadow-xl transition-shadow">
-                                  <div className="bg-gradient-to-r from-cerulean-blue to-deep-blue px-6 py-4">
+                                <div className="bg-white rounded-2xl shadow-lg border-2 border-sky-blue/30 overflow-hidden hover:shadow-xl transition-shadow">
+                                  <div className="bg-gradient-to-r from-sky-blue to-navy px-6 py-4">
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center space-x-2">
                                         <Sparkles className="w-5 h-5 text-white" />
-                                        <h3 className="font-semibold text-white">AI Assistant Response</h3>
+                                        <h3 className="font-semibold text-white voice-invested">AI Assistant Response</h3>
                                       </div>
                                       <button
                                         onClick={() => copyToClipboard(synthesizedAnswer, `synth-${index}`)}
                                         className="p-2 hover:bg-white/20 rounded-lg transition-colors"
                                         title="Copy to clipboard"
+                                        aria-label="Copy response to clipboard"
                                       >
                                         {copiedIndex === `synth-${index}` ? (
-                                          <CheckCheck className="w-4 h-4 text-white" />
+                                          <CheckCheck className="w-4 h-4 text-white" aria-hidden="true" />
                                         ) : (
-                                          <Copy className="w-4 h-4 text-white" />
+                                          <Copy className="w-4 h-4 text-white" aria-hidden="true" />
                                         )}
                                       </button>
                                     </div>
-                                    <p className="text-blue-100 text-sm mt-1">Direct answer to your question</p>
+                                    <p className="text-white/80 text-sm mt-1 font-georgia">Direct answer to your question</p>
                                   </div>
-                                  <div className="p-6">
-                                    <div className="text-rush-black leading-relaxed">
+                                  <div className="p-6 bg-gradient-to-b from-white to-sage/10">
+                                    <div className="text-rush-black leading-relaxed font-georgia voice-accessible">
                                       {synthesizedAnswer.split('\n').map((paragraph, idx) => (
                                         paragraph.trim() && (
                                           <p key={idx} className="mb-3 last:mb-0">{paragraph.trim()}</p>
@@ -518,17 +521,17 @@ export default function Home() {
             {isLoading && (
               <div className="flex justify-start animate-fade-in-up">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-growth-green to-legacy-green rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                  <div className="w-10 h-10 bg-gradient-to-br from-growth to-legacy rounded-xl flex items-center justify-center flex-shrink-0 shadow-md border border-vitality/40">
                     <FileText className="w-5 h-5 text-white" />
                   </div>
-                  <div className="bg-sage/50 px-6 py-4 rounded-2xl shadow-md border border-wash-green">
+                  <div className="bg-sage/40 px-6 py-4 rounded-2xl shadow-md border border-growth/30">
                     <div className="flex items-center space-x-3">
                       <div className="flex space-x-2">
-                        <div className="w-2.5 h-2.5 bg-growth-green rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                        <div className="w-2.5 h-2.5 bg-growth-green rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                        <div className="w-2.5 h-2.5 bg-growth-green rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        <div className="w-2.5 h-2.5 bg-growth rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2.5 h-2.5 bg-vitality rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-2.5 h-2.5 bg-legacy rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                       </div>
-                      <span className="text-sm text-growth-green font-medium">Searching policies...</span>
+                      <span className="text-sm text-legacy font-semibold voice-invested">Searching policies...</span>
                     </div>
                   </div>
                 </div>
@@ -538,7 +541,7 @@ export default function Home() {
           </div>
 
           {/* Chat Input */}
-          <div className="border-t border-gray-200 p-6 bg-gradient-to-r from-ivory/30 to-sage/10">
+          <div className="border-t border-rush-gray/30 p-6 bg-gradient-to-r from-sand/20 to-sage/20">
             <form onSubmit={sendMessage} className="flex space-x-3">
               <div className="flex-1 relative">
                 <input
@@ -547,11 +550,12 @@ export default function Home() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder="Ask about any Rush policy, procedure, or guideline..."
-                  className="w-full border-2 border-gray-300 rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-growth-green focus:border-growth-green transition-all duration-200 bg-white text-rush-black placeholder-gray-400 text-base shadow-sm hover:border-growth-green/50"
+                  className="w-full border-2 border-rush-gray/40 rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-growth focus:border-growth transition-all duration-200 bg-white text-rush-black placeholder-rush-gray text-base shadow-sm hover:border-growth/50 font-georgia"
                   disabled={isLoading}
+                  aria-label="Ask a policy question"
                 />
                 {inputValue && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-rush-gray font-medium">
                     Press Enter ↵
                   </div>
                 )}
@@ -560,16 +564,17 @@ export default function Home() {
                 type="submit"
                 disabled={isLoading || !inputValue.trim()}
                 className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed px-8 min-w-[120px]"
+                aria-label="Send message"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span className="hidden sm:inline ml-2">Searching...</span>
+                    <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                    <span className="hidden sm:inline ml-2 voice-invested">Searching...</span>
                   </>
                 ) : (
                   <>
-                    <Send className="w-5 h-5" />
-                    <span className="hidden sm:inline ml-2">Send</span>
+                    <Send className="w-5 h-5" aria-hidden="true" />
+                    <span className="hidden sm:inline ml-2 voice-invested">Send</span>
                   </>
                 )}
               </button>
@@ -578,17 +583,18 @@ export default function Home() {
                 onClick={handleClear}
                 className="btn-secondary px-6"
                 disabled={messages.length === 0 && !inputValue}
+                aria-label="Clear conversation"
               >
                 Clear
               </button>
             </form>
-            <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
-              <div className="flex items-center space-x-4">
-                <span>💡 Tip: Use ⌘K to focus the input</span>
+            <div className="mt-3 flex items-center justify-between text-xs">
+              <div className="flex items-center space-x-4 text-rush-black">
+                <span className="font-georgia">💡 Tip: Use ⌘K to focus the input</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-1.5 h-1.5 bg-growth-green rounded-full"></div>
-                <span>Ready to assist</span>
+              <div className="flex items-center space-x-2 px-2 py-1 bg-white rounded-full border border-growth/20">
+                <div className="w-1.5 h-1.5 bg-growth rounded-full animate-pulse"></div>
+                <span className="text-legacy font-medium">Ready to assist</span>
               </div>
             </div>
           </div>
@@ -596,13 +602,22 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="mt-4 py-6 text-center text-sm text-gray-600 border-t border-gray-200">
+      <footer className="mt-4 py-6 text-center text-sm border-t border-rush-gray/30 bg-gradient-to-r from-sage/10 to-sand/10">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex items-center justify-center space-x-2 mb-2">
-            <Shield className="w-4 h-4 text-vitality-green" />
-            <span className="font-medium">Internal Rush University System Policy Assistant</span>
+            <Shield className="w-4 h-4 text-growth" />
+            <span className="font-semibold text-legacy">Internal Rush University System Policy Assistant</span>
           </div>
-          <p className="text-xs text-gray-500">Powered by Azure OpenAI GPT-4 • Secure & Confidential</p>
+          <p className="text-xs text-rush-black font-georgia">Powered by Azure OpenAI GPT-4 • Secure & Confidential</p>
+          <div className="mt-2 flex items-center justify-center space-x-3 text-xs text-rush-gray">
+            <span>Inclusive</span>
+            <span>•</span>
+            <span>Invested</span>
+            <span>•</span>
+            <span>Inventive</span>
+            <span>•</span>
+            <span>Accessible</span>
+          </div>
         </div>
       </footer>
 
