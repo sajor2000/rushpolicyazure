@@ -54,12 +54,20 @@ export async function POST(request) {
 
     await client.beta.threads.messages.create(conversationThread.id, {
       role: "user",
-      content: `Please provide information about: "${message}"
+      content: `User question: "${message}"
 
-Respond in this exact format:
+IMPORTANT: Provide your response in TWO clearly separated parts:
 
-SYNTHESIZED_ANSWER:
-[Provide a conservative, factual answer to the specific question in 2-3 paragraphs maximum. Be direct, conservative, and factual with no creativity. Answer only what was asked.]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 1 - SYNTHESIZED ANSWER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ANSWER:
+[Provide a concise, clear 2-3 sentence direct answer to the user's question. This should be factual, specific, and immediately useful. Base this answer ONLY on the official PolicyTech document content.]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 2 - SOURCE DOCUMENT EVIDENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 FULL_POLICY_DOCUMENT:
 [Provide the complete, exact policy document text as it appears in PolicyTech. Include all original formatting, section numbers, headers, effective dates, policy numbers, and exact language. This should be a verbatim copy of the original document.]`

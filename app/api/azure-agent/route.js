@@ -44,13 +44,21 @@ export async function POST(request) {
       "user",
       `User question: "${message}"
 
-IMPORTANT: Provide your response in TWO parts:
+IMPORTANT: Provide your response in TWO clearly separated parts:
 
-PART 1 - QUICK ANSWER:
-Start with "ANSWER:" followed by a concise 2-3 sentence direct answer to the user's question. This should be clear, specific, and immediately useful.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 1 - SYNTHESIZED ANSWER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-PART 2 - FULL POLICY DOCUMENT:
-Then provide "FULL_POLICY_DOCUMENT:" followed by the complete Rush PolicyTech document in its native format. Format the response EXACTLY as it appears in the official PolicyTech PDF document, including:
+ANSWER:
+[Provide a concise, clear 2-3 sentence direct answer to the user's question. This should be factual, specific, and immediately useful. Base this answer ONLY on the official PolicyTech document content.]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 2 - SOURCE DOCUMENT EVIDENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FULL_POLICY_DOCUMENT:
+[Complete Rush PolicyTech document in its native format. Format the response EXACTLY as it appears in the official PolicyTech PDF document, including:
 
 REQUIRED DOCUMENT STRUCTURE:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { Send, FileText, AlertCircle, Shield, Loader2, User, MessageSquare, Users, Copy, CheckCheck, Sparkles, Clock, AlertTriangle, Building2 } from 'lucide-react';
+import { Send, FileText, AlertCircle, Shield, Loader2, User, MessageSquare, Users, Copy, CheckCheck, Sparkles, Clock, AlertTriangle, Building2, BookOpen } from 'lucide-react';
 
 /**
  * Rush Policy Assistant - Azure GPT-5 Chat Model
@@ -80,16 +80,41 @@ export default function Home() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Parse response and extract metadata for PDF-style display
+  // Parse response and extract answer, document, and metadata
   const parseResponse = (content) => {
-    // Extract key metadata from the response
-    const policyNumberMatch = content.match(/(?:Policy\s*(?:Number|#)?|Reference\s*Number)\s*:?\s*([A-Z0-9\-]+)/i);
-    const titleMatch = content.match(/(?:Policy\s*Title)\s*:?\s*([^\n]+)/i);
-    const effectiveDateMatch = content.match(/(?:Effective\s*Date|Date\s*Approved)\s*:?\s*([^\n]+)/i);
-    const departmentMatch = content.match(/(?:Department|Applies\s*To|Document\s*Owner)\s*:?\s*([^\n]+)/i);
+    // Split content into answer and full document sections
+    let answer = '';
+    let fullDocument = '';
+
+    // Look for the ANSWER: and FULL_POLICY_DOCUMENT: markers
+    const answerMatch = content.match(/ANSWER:\s*([\s\S]*?)(?=FULL_POLICY_DOCUMENT:|$)/i);
+    const documentMatch = content.match(/FULL_POLICY_DOCUMENT:\s*([\s\S]*)/i);
+
+    if (answerMatch && answerMatch[1]) {
+      // Clean up the answer (remove separator lines and extra whitespace)
+      answer = answerMatch[1]
+        .replace(/━+/g, '') // Remove separator lines
+        .replace(/PART \d+ - .*?\n/gi, '') // Remove PART headers
+        .trim();
+    }
+
+    if (documentMatch && documentMatch[1]) {
+      fullDocument = documentMatch[1].trim();
+    } else {
+      // Fallback: if no FULL_POLICY_DOCUMENT marker, use entire content as document
+      fullDocument = content;
+    }
+
+    // Extract key metadata from the full document section
+    const policyNumberMatch = fullDocument.match(/(?:Policy\s*(?:Number|#)?|Reference\s*Number)\s*:?\s*([A-Z0-9\-]+)/i);
+    const titleMatch = fullDocument.match(/(?:Policy\s*Title)\s*:?\s*([^\n]+)/i);
+    const effectiveDateMatch = fullDocument.match(/(?:Effective\s*Date|Date\s*Approved)\s*:?\s*([^\n]+)/i);
+    const departmentMatch = fullDocument.match(/(?:Department|Applies\s*To|Document\s*Owner)\s*:?\s*([^\n]+)/i);
 
     return {
-      content: content, // Full content as-is
+      answer: answer,
+      fullDocument: fullDocument,
+      content: content, // Keep full content for backward compatibility
       metadata: {
         policyNumber: policyNumberMatch ? policyNumberMatch[1].trim() : null,
         policyTitle: titleMatch ? titleMatch[1].trim() : null,
@@ -409,106 +434,149 @@ export default function Home() {
                       </div>
                     </div>
                   ) : (
-                    // PDF-Style Single Document
+                    // Answer + Source Document Evidence
                     <div className="flex items-start space-x-3 w-full max-w-4xl">
                       <div className="w-10 h-10 bg-gradient-to-br from-growth to-legacy rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
                         <FileText className="w-5 h-5 text-white" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 space-y-4">
                         {(() => {
-                          const { content, metadata } = parseResponse(message.content);
+                          const { answer, fullDocument, content, metadata } = parseResponse(message.content);
 
                           return (
-                            <div className="pdf-document-container">
-                              {/* PDF Document Header */}
-                              <div className="pdf-header">
-                                <div className="flex items-center justify-between mb-4">
-                                  <div className="flex items-center space-x-3">
-                                    <img src="/images/rush-logo.jpg" alt="Rush" className="h-8 object-contain" />
-                                    <div className="border-l border-rush-gray h-8"></div>
-                                    <div>
-                                      <h3 className="font-semibold text-legacy text-lg">Rush University Policy Document</h3>
-                                      <p className="text-xs text-rush-black/70">PolicyTech Database</p>
-                                    </div>
+                            <>
+                              {/* Answer Section */}
+                              {answer && (
+                                <div className="answer-section">
+                                  <div className="answer-header">
+                                    <MessageSquare className="w-5 h-5 text-growth" />
+                                    <h3>Answer</h3>
                                   </div>
-                                  <button
-                                    onClick={() => copyToClipboard(content, `doc-${index}`)}
-                                    className="pdf-copy-button"
-                                    title="Copy document"
-                                    aria-label="Copy document to clipboard"
-                                  >
-                                    {copiedIndex === `doc-${index}` ? (
-                                      <>
-                                        <CheckCheck className="w-4 h-4" aria-hidden="true" />
-                                        <span>Copied</span>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Copy className="w-4 h-4" aria-hidden="true" />
-                                        <span>Copy</span>
-                                      </>
-                                    )}
-                                  </button>
-                                </div>
-
-                                {/* Metadata Bar */}
-                                {(metadata.policyNumber || metadata.policyTitle || metadata.effectiveDate || metadata.department) && (
-                                  <div className="pdf-metadata-bar">
-                                    {metadata.policyNumber && (
-                                      <span className="pdf-badge">
-                                        <FileText className="w-3 h-3" />
-                                        Policy #{metadata.policyNumber}
-                                      </span>
-                                    )}
-                                    {metadata.effectiveDate && (
-                                      <span className="pdf-badge">
-                                        <Clock className="w-3 h-3" />
-                                        {metadata.effectiveDate}
-                                      </span>
-                                    )}
-                                    {metadata.department && (
-                                      <span className="pdf-badge">
-                                        <Building2 className="w-3 h-3" />
-                                        {metadata.department}
-                                      </span>
-                                    )}
+                                  <div className="answer-content">
+                                    <p className="voice-inclusive font-georgia leading-relaxed">{answer}</p>
                                   </div>
-                                )}
-                              </div>
-
-                              {/* PDF Document Body */}
-                              <div className="pdf-body">
-                                {formatDocumentContent(content)}
-                              </div>
-
-                              {/* PDF Document Footer */}
-                              <div className="pdf-footer">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-rush-black/70">
-                                  <div>
-                                    <div className="mb-1">
-                                      <span className="font-semibold">Source:</span> Rush PolicyTech Database
-                                    </div>
-                                    <div>
-                                      <span className="font-semibold">Access:</span> Authorized Personnel Only
-                                    </div>
-                                  </div>
-                                  <div className="md:text-right">
-                                    <div className="mb-1">
-                                      <span className="font-semibold">Retrieved:</span> {message.timestamp?.toLocaleDateString('en-US', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                      })}
-                                    </div>
-                                    <div>
-                                      <span className="font-semibold">Property of:</span> Rush University System for Health
-                                    </div>
+                                  <div className="flex justify-end mt-3">
+                                    <button
+                                      onClick={() => copyToClipboard(answer, `answer-${index}`)}
+                                      className="answer-copy-button-inline"
+                                      title="Copy answer"
+                                      aria-label="Copy answer to clipboard"
+                                    >
+                                      {copiedIndex === `answer-${index}` ? (
+                                        <>
+                                          <CheckCheck className="w-4 h-4" aria-hidden="true" />
+                                          <span>Copied</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Copy className="w-4 h-4" aria-hidden="true" />
+                                          <span>Copy</span>
+                                        </>
+                                      )}
+                                    </button>
                                   </div>
                                 </div>
+                              )}
+
+                              {/* Source Document Evidence Section */}
+                              <div className="evidence-section">
+                                <div className="evidence-header">
+                                  <BookOpen className="w-5 h-5 text-legacy" />
+                                  <h3>Source Document Evidence</h3>
+                                </div>
+
+                                <div className="pdf-document-container">
+                                  {/* PDF Document Header */}
+                                  <div className="pdf-header">
+                                    <div className="flex items-center justify-between mb-4">
+                                      <div className="flex items-center space-x-3">
+                                        <img src="/images/rush-logo.jpg" alt="Rush" className="h-8 object-contain" />
+                                        <div className="border-l border-rush-gray h-8"></div>
+                                        <div>
+                                          <h4 className="font-semibold text-legacy text-lg">Rush University Policy Document</h4>
+                                          <p className="text-xs text-rush-black/70">PolicyTech Database</p>
+                                        </div>
+                                      </div>
+                                      <button
+                                        onClick={() => copyToClipboard(fullDocument, `doc-${index}`)}
+                                        className="pdf-copy-button"
+                                        title="Copy full document"
+                                        aria-label="Copy full document to clipboard"
+                                      >
+                                        {copiedIndex === `doc-${index}` ? (
+                                          <>
+                                            <CheckCheck className="w-4 h-4" aria-hidden="true" />
+                                            <span>Copied</span>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Copy className="w-4 h-4" aria-hidden="true" />
+                                            <span>Copy</span>
+                                          </>
+                                        )}
+                                      </button>
+                                    </div>
+
+                                    {/* Metadata Bar */}
+                                    {(metadata.policyNumber || metadata.policyTitle || metadata.effectiveDate || metadata.department) && (
+                                      <div className="pdf-metadata-bar">
+                                        {metadata.policyNumber && (
+                                          <span className="pdf-badge">
+                                            <FileText className="w-3 h-3" />
+                                            Policy #{metadata.policyNumber}
+                                          </span>
+                                        )}
+                                        {metadata.effectiveDate && (
+                                          <span className="pdf-badge">
+                                            <Clock className="w-3 h-3" />
+                                            {metadata.effectiveDate}
+                                          </span>
+                                        )}
+                                        {metadata.department && (
+                                          <span className="pdf-badge">
+                                            <Building2 className="w-3 h-3" />
+                                            {metadata.department}
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* PDF Document Body */}
+                                  <div className="pdf-body">
+                                    {formatDocumentContent(fullDocument)}
+                                  </div>
+
+                                  {/* PDF Document Footer */}
+                                  <div className="pdf-footer">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-rush-black/70">
+                                      <div>
+                                        <div className="mb-1">
+                                          <span className="font-semibold">Source:</span> Rush PolicyTech Database
+                                        </div>
+                                        <div>
+                                          <span className="font-semibold">Access:</span> Authorized Personnel Only
+                                        </div>
+                                      </div>
+                                      <div className="md:text-right">
+                                        <div className="mb-1">
+                                          <span className="font-semibold">Retrieved:</span> {message.timestamp?.toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                          })}
+                                        </div>
+                                        <div>
+                                          <span className="font-semibold">Property of:</span> Rush University System for Health
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
+                            </>
                           );
                         })()}
                       </div>

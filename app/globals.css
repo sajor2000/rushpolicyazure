@@ -94,6 +94,49 @@ p, span, div, body {
   @apply font-georgia;
 }
 
+/* Answer Section Styles */
+.answer-section {
+  @apply bg-gradient-to-br from-sage/30 to-vitality/10
+         border-2 border-growth/40 rounded-xl p-6 shadow-md;
+}
+
+.answer-header {
+  @apply flex items-center space-x-2 mb-4 pb-3 border-b-2 border-growth/30;
+}
+
+.answer-header h3 {
+  @apply text-xl font-bold text-legacy;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.answer-content {
+  @apply mb-2;
+}
+
+.answer-content p {
+  @apply text-rush-black text-base leading-relaxed;
+}
+
+.answer-copy-button-inline {
+  @apply flex items-center space-x-2 px-4 py-2 text-sm font-medium text-legacy
+         bg-white/80 hover:bg-white border border-growth/30 rounded-lg
+         transition-all duration-200 hover:shadow-md;
+}
+
+/* Evidence Section Styles */
+.evidence-section {
+  @apply space-y-3;
+}
+
+.evidence-header {
+  @apply flex items-center space-x-2 mb-3 pb-2 border-b-2 border-legacy/20;
+}
+
+.evidence-header h3 {
+  @apply text-lg font-bold text-legacy;
+  font-family: 'Montserrat', sans-serif;
+}
+
 /* PDF-Style Document Components */
 .pdf-document-container {
   @apply bg-white shadow-lg border border-rush-gray/20 rounded-lg overflow-hidden;
