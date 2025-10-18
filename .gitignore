@@ -81,5 +81,8 @@ replit.nix
 attached_assets/
 assets/docs/
 
+# Keep public images for the app
+!public/images/
+
 # Replit logs
 *.replit.log

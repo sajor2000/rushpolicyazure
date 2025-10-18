@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { Send, FileText, AlertCircle, Shield, Loader2, User, MessageSquare, Building2, Plus, Zap, Users, Copy, CheckCheck, Sparkles, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
 
 /**
@@ -273,15 +274,21 @@ export default function Home() {
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center space-x-6">
               <div className="flex-shrink-0">
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <Building2 className="h-10 w-10 text-growth" />
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-vitality rounded-full animate-pulse"></div>
+                <div className="flex items-center space-x-4">
+                  <div className="relative w-[120px] h-10">
+                    <Image 
+                      src="/images/rush-logo.jpg"
+                      alt="Rush University Medical Center"
+                      fill
+                      priority
+                      className="object-contain"
+                    />
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-vitality rounded-full animate-pulse z-10"></div>
                   </div>
                   <div className="border-l border-rush-gray h-10"></div>
                   <div>
-                    <h1 className="text-xl font-semibold text-legacy">Policy Assistant</h1>
-                    <p className="text-sm text-rush-black font-georgia">Rush University System for Health</p>
+                    <h1 className="text-xl font-semibold text-legacy">Policy Chat</h1>
+                    <p className="text-sm text-rush-black font-georgia">Chat with all policies in PolicyTech</p>
                   </div>
                 </div>
               </div>
