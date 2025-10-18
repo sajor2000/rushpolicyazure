@@ -2,6 +2,8 @@
 
 The Rush Policy Chat Assistant is a Next.js application that provides AI-powered policy document queries for Rush University Medical Center staff. This is a beta demonstration built to showcase intelligent policy search capabilities using Azure OpenAI GPT-4. The application allows users to search through 800+ policy documents using natural language queries and receive both synthesized answers and full policy details.
 
+**Latest Update (October 2025)**: Enhanced with world-class UI/UX featuring modern animations, suggested prompts, keyboard shortcuts, toast notifications, copy functionality, and full accessibility support (WCAG AA compliant).
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -17,6 +19,17 @@ The application uses Next.js 14 with the App Router architecture for modern Reac
 - **Client-side conversation state** managed in React with real-time message streaming
 - **Mobile-responsive design** optimized for healthcare staff using various devices
 - **Lucide React icons** for consistent iconography throughout the interface
+
+### Recent UI/UX Enhancements (October 2025)
+- **Suggested Prompts**: 4 pre-configured policy questions with category badges for quick start
+- **Toast Notifications**: Real-time user feedback with ARIA live regions for accessibility
+- **Copy Functionality**: One-click copy for AI responses and full policy documents
+- **Keyboard Shortcuts**: ⌘K/Ctrl+K to focus input, Escape to clear
+- **Smooth Animations**: Fade-in effects, slide transitions, and micro-interactions
+- **Enhanced Loading States**: Contextual messages and pulsing indicators
+- **Error Handling**: Clear, actionable error messages with visual feedback
+- **Accessibility**: WCAG AA compliant with keyboard navigation, focus states, and reduced motion support
+- **Responsive Design**: Optimized for desktop (1920x1080), tablet (768x1024), and mobile (375x667)
 
 ## Backend Architecture
 
