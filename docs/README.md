@@ -3,7 +3,7 @@
 
 > **⚠️ IMPORTANT NOTICE: This is a DEMO VERSION built by Juan C. Rojas MD, MS for demonstration purposes only. This beta version uses secure Azure resources and is not intended for production use.**
 
-An AI-powered chat interface for Rush University employees to query official policy documents. Built with Next.js and Azure OpenAI, this application provides instant access to over 1300 PolicyTech documents with intelligent search and interpretation capabilities.
+An AI-powered chat interface for Rush University System for Health employees to query official policy documents. Built with Next.js and Azure GPT-4.5-Chat Model, this application provides instant access to over 1300 PolicyTech documents with intelligent search and interpretation capabilities.
 
 ![Rush Policy Assistant](https://img.shields.io/badge/Rush-Policy%20Assistant-006341)
 ![Status](https://img.shields.io/badge/Status-Beta%20Demo-orange)
@@ -25,8 +25,8 @@ This beta demonstration:
 
 - **Intelligent Policy Search**: Natural language queries to find relevant policies
 - **1300+ PolicyTech Documents**: Comprehensive coverage of Rush University policies from PolicyTech
-- **Real-time Responses**: Powered by Azure OpenAI GPT-4
-- **Secure Authentication**: API key-based access control
+- **Real-time Responses**: Powered by Azure GPT-4.5-Chat Model
+- **Secure Authentication**: Managed Identity (zero API keys)
 - **Rush University Branded**: Official Rush green color scheme and branding
 - **Mobile Responsive**: Works on all devices
 - **Compliance Logging**: All interactions logged for audit purposes
@@ -35,10 +35,10 @@ This beta demonstration:
 
 ### Prerequisites
 
-- Node.js 16.x or higher
+- Node.js 18.x or higher
 - npm or yarn
-- Azure OpenAI resource with GPT-4 deployment
-- OpenAI Assistant configured with Rush policy documents
+- Azure AI resource with GPT-4.5-Chat Model
+- Azure AI Agent configured with 1300+ Rush PolicyTech documents
 
 ### Installation
 
@@ -212,9 +212,9 @@ The policy database is updated automatically when new documents are added to the
 
 ## 👨‍⚕️ Author
 
-**Juan C. Rojas MD, MS**  
-Department of Internal Medicine  
-Rush University Medical Center
+**Juan C. Rojas MD, MS**
+Department of Internal Medicine
+Rush University System for Health
 
 This beta demonstration was created to showcase the potential of AI-powered policy assistance for healthcare institutions.
 
@@ -224,4 +224,4 @@ This is a **DEMONSTRATION PROJECT** for beta testing purposes only. It uses secu
 
 ---
 
-Made with ❤️ for Rush University Medical Center
+Made with ❤️ for Rush University System for Health

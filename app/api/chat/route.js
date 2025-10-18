@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server';
 import { AzureOpenAI } from 'openai';
 
-const client = new AzureOpenAI({
-  apiKey: process.env.AZURE_OPENAI_API_KEY,
-  endpoint: process.env.AZURE_OPENAI_ENDPOINT, 
-  apiVersion: "2024-05-01-preview"
-});
+// Only initialize OpenAI client if credentials are available
+let client = null;
+let ASSISTANT_ID = null;
 
-const ASSISTANT_ID = process.env.ASSISTANT_ID;
+if (process.env.AZURE_OPENAI_API_KEY && process.env.AZURE_OPENAI_ENDPOINT) {
+  client = new AzureOpenAI({
+    apiKey: process.env.AZURE_OPENAI_API_KEY,
+    endpoint: process.env.AZURE_OPENAI_ENDPOINT, 
+    apiVersion: "2024-05-01-preview"
+  });
+  ASSISTANT_ID = process.env.ASSISTANT_ID;
+}
 
 // In-memory thread storage (in production, use Redis or database)
 let conversationThread = null;
@@ -15,13 +20,14 @@ let conversationThread = null;
 export async function POST(request) {
   console.log('API Route called:', new Date().toISOString());
 
-  // Check if environment variables are set
-  if (!process.env.AZURE_OPENAI_API_KEY || !process.env.AZURE_OPENAI_ENDPOINT) {
-    console.error('Missing Azure OpenAI configuration');
+  // Check if OpenAI client is available
+  if (!client || !ASSISTANT_ID) {
+    console.error('OpenAI client not configured');
     return NextResponse.json({ 
-      error: 'Server configuration error', 
-      details: 'Azure OpenAI credentials not configured'
-    }, { status: 500 });
+      error: 'OpenAI Assistant not available', 
+      details: 'Azure OpenAI credentials not configured. Please use the Azure AI Agent instead.',
+      suggestion: 'Try switching to the Azure AI Agent using the toggle in the header.'
+    }, { status: 503 });
   }
 
   try {

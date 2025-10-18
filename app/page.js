@@ -1,17 +1,22 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { Send, FileText, AlertCircle, Shield, Loader2, User, MessageSquare, Building2, Plus, Zap, Users, Copy, CheckCheck, Sparkles, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Send, FileText, AlertCircle, Shield, Loader2, User, MessageSquare, Users, Copy, CheckCheck, Sparkles, Clock, AlertTriangle, Building2 } from 'lucide-react';
 
 /**
- * Rush University Medical Center - Official Brand Color Palette
- * 
+ * Rush Policy Assistant - Azure GPT-5 Chat Model
+ *
+ * This application uses Azure GPT-5 Chat Model (latest generation) via Azure AI Agent
+ * with Managed Identity authentication (zero API keys required).
+ *
+ * Rush University System for Health - Official Brand Color Palette
+ *
  * Primary Colors:
  * - Legacy: #006332 (Primary green - represents heritage and trust)
  * - Growth: #30AE6E (Vibrant green - represents progress)
  * - Vitality: #5FEEA2 (Bright green - represents energy)
  * - Sage: #DFF9EB (Soft green - represents calm and care)
- * 
+ *
  * Accent Colors:
  * - Gold: #FFC60B (Optimism and excellence)
  * - Sky Blue: #54ADD3 (Innovation and clarity)
@@ -20,19 +25,19 @@ import { Send, FileText, AlertCircle, Shield, Loader2, User, MessageSquare, Buil
  * - Violet: #6C43B9 (Creativity and vision)
  * - Blush: #FFE3E0 (Warmth and compassion)
  * - Sand: #F2DBB3 (Comfort and accessibility)
- * 
+ *
  * Neutrals:
  * - Rush Black: #5F5858 (Primary text)
  * - Rush Gray: #AFAEAF (Secondary text)
- * 
+ *
  * Brand Voice: Inclusive, Invested, Inventive, Accessible
  */
 
 const SUGGESTED_PROMPTS = [
-  { icon: Clock, text: "How do I request time off?", category: "Time Off" },
-  { icon: Shield, text: "Help me understand HIPAA compliance", category: "Compliance" },
-  { icon: Users, text: "What are our remote work options?", category: "Work Policies" },
-  { icon: TrendingUp, text: "Employee benefits overview", category: "Benefits" },
+  { icon: Shield, text: "What are our HIPAA privacy requirements?", category: "Compliance & Privacy" },
+  { icon: FileText, text: "Show me the infection control policy", category: "Clinical Guidance" },
+  { icon: Users, text: "Can I work remotely?", category: "Workforce & HR" },
+  { icon: Clock, text: "How does PTO accrual work?", category: "Time & Benefits" },
 ];
 
 export default function Home() {
@@ -75,90 +80,115 @@ export default function Home() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Parse and format dual-response content
+  // Parse response and extract metadata for PDF-style display
   const parseResponse = (content) => {
-    const synthesizedMatch = content.match(/SYNTHESIZED_ANSWER:\s*(.*?)\s*(?=FULL_POLICY_DOCUMENT:|$)/s);
-    const documentMatch = content.match(/FULL_POLICY_DOCUMENT:\s*(.*)/s);
+    // Extract key metadata from the response
+    const policyNumberMatch = content.match(/(?:Policy\s*(?:Number|#)?|Reference\s*Number)\s*:?\s*([A-Z0-9\-]+)/i);
+    const titleMatch = content.match(/(?:Policy\s*Title)\s*:?\s*([^\n]+)/i);
+    const effectiveDateMatch = content.match(/(?:Effective\s*Date|Date\s*Approved)\s*:?\s*([^\n]+)/i);
+    const departmentMatch = content.match(/(?:Department|Applies\s*To|Document\s*Owner)\s*:?\s*([^\n]+)/i);
 
     return {
-      synthesizedAnswer: synthesizedMatch ? synthesizedMatch[1].trim() : '',
-      fullDocument: documentMatch ? documentMatch[1].trim() : content
+      content: content, // Full content as-is
+      metadata: {
+        policyNumber: policyNumberMatch ? policyNumberMatch[1].trim() : null,
+        policyTitle: titleMatch ? titleMatch[1].trim() : null,
+        effectiveDate: effectiveDateMatch ? effectiveDateMatch[1].trim() : null,
+        department: departmentMatch ? departmentMatch[1].trim() : null,
+      }
     };
   };
 
-  // Format content to look like a policy document (for full document section)
+  // PDF-style document formatting with professional typography
   const formatDocumentContent = (content) => {
     const lines = content.split('\n');
     const formatted = [];
-    let isHeaderSection = true;
-    let headerLines = [];
+    let currentSection = null;
 
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
 
-      // Detect header information (first several lines with colons)
-      if (isHeaderSection && (trimmedLine.includes(':') || trimmedLine.match(/^(Policy Title|Former Policy Number|Document Owner|Approver|Date|Review Due|Applies To|Reference Number)/))) {
-        headerLines.push(trimmedLine);
-        return;
-      } else if (isHeaderSection && trimmedLine === '') {
-        // Empty line after header, render header block
-        if (headerLines.length > 0) {
-          formatted.push(
-            <div key="header" className="policy-header-info">
-              {headerLines.map((headerLine, idx) => (
-                <p key={idx} className="text-xs text-black">{headerLine}</p>
-              ))}
-            </div>
-          );
-        }
-        isHeaderSection = false;
-        return;
-      } else if (isHeaderSection) {
-        isHeaderSection = false;
-        if (headerLines.length > 0) {
-          formatted.push(
-            <div key="header" className="policy-header-info">
-              {headerLines.map((headerLine, idx) => (
-                <p key={idx} className="text-xs text-black">{headerLine}</p>
-              ))}
-            </div>
-          );
-        }
-      }
-
+      // Skip empty lines but preserve spacing
       if (!trimmedLine) {
-        formatted.push(<div key={index} className="mb-2"></div>);
+        formatted.push(<div key={`space-${index}`} className="h-4"></div>);
         return;
       }
 
-      // Roman numerals or main sections
-      if (/^[IVX]+\.\s/.test(trimmedLine) || trimmedLine.match(/^(I\.|II\.|III\.|IV\.|V\.)/)) {
+      // Major section headers (### style or Section:)
+      if (trimmedLine.startsWith('###') || trimmedLine.match(/^(POLICY|SECTION|PROCEDURE|DEFINITIONS?|REFERENCES?|SCOPE|PURPOSE)/i)) {
+        const headerText = trimmedLine.replace(/^###\s*/, '').replace(/^📋\s*/, '');
         formatted.push(
-          <h2 key={index} className="policy-section-header font-bold text-black mt-4 mb-2 text-sm">
-            {trimmedLine}
+          <h2 key={index} className="pdf-section-header">
+            {headerText}
           </h2>
         );
       }
-      // Letter subsections (A., B., C., etc.)
-      else if (/^[A-Z]\.\s/.test(trimmedLine)) {
+      // Subsection headers (** style or bold indicators)
+      else if (trimmedLine.startsWith('**') || trimmedLine.match(/^[IVX]+\.\s/) || trimmedLine.match(/^\d+\.\s[A-Z]/)) {
+        const headerText = trimmedLine.replace(/^\*\*/, '').replace(/\*\*$/, '');
         formatted.push(
-          <div key={index} className="policy-subsection mb-3">
-            <p className="font-semibold text-black text-xs mb-1">{trimmedLine}</p>
+          <h3 key={index} className="pdf-subsection-header">
+            {headerText}
+          </h3>
+        );
+      }
+      // Metadata lines (key: value format)
+      else if (trimmedLine.includes(':') && trimmedLine.length < 100 && !trimmedLine.match(/^[a-z]/)) {
+        const [key, ...valueParts] = trimmedLine.split(':');
+        const value = valueParts.join(':').trim();
+        formatted.push(
+          <div key={index} className="pdf-metadata-line">
+            <span className="pdf-metadata-key">{key}:</span>
+            <span className="pdf-metadata-value">{value}</span>
           </div>
         );
       }
-      // Numbered items (i., ii., iii., etc.)
-      else if (/^[ivx]+\.\s/.test(trimmedLine)) {
+      // Bulleted list items
+      else if (trimmedLine.match(/^[•\-\*]\s/) || trimmedLine.match(/^[☒☐]\s/)) {
+        const text = trimmedLine.replace(/^[•\-\*☒☐]\s*/, '');
+        const isChecked = trimmedLine.startsWith('☒');
         formatted.push(
-          <div key={index} className="policy-item ml-6 mb-2">
-            <p className="text-black text-xs">{trimmedLine}</p>
+          <div key={index} className="pdf-list-item">
+            <span className="pdf-bullet">{isChecked ? '☑' : '•'}</span>
+            <span>{text}</span>
           </div>
         );
       }
-      // Regular paragraphs
+      // Numbered list items (a., i., 1., etc.)
+      else if (trimmedLine.match(/^[a-z]\.\s/) || trimmedLine.match(/^[ivx]+\.\s/) || trimmedLine.match(/^\d+\.\s/)) {
+        formatted.push(
+          <div key={index} className="pdf-numbered-item">
+            {trimmedLine}
+          </div>
+        );
+      }
+      // Quoted or highlighted text (>)
+      else if (trimmedLine.startsWith('>')) {
+        const text = trimmedLine.replace(/^>\s*/, '');
+        formatted.push(
+          <blockquote key={index} className="pdf-blockquote">
+            {text}
+          </blockquote>
+        );
+      }
+      // Separator lines (---, ===)
+      else if (trimmedLine.match(/^[-=]{3,}$/)) {
+        formatted.push(
+          <hr key={index} className="pdf-separator" />
+        );
+      }
+      // Warning/Note indicators
+      else if (trimmedLine.match(/^⚠️|^💡|^ℹ️|^NOTE:|^WARNING:/i)) {
+        formatted.push(
+          <div key={index} className="pdf-notice">
+            {trimmedLine}
+          </div>
+        );
+      }
+      // Regular paragraph text
       else {
         formatted.push(
-          <p key={index} className="mb-2 text-black text-xs leading-relaxed text-justify">
+          <p key={index} className="pdf-paragraph">
             {trimmedLine}
           </p>
         );
@@ -191,18 +221,24 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch('/api/azure-agent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: messageToSend,
           resetConversation: messages.length === 0
         }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('JSON parse error:', jsonError);
+        throw new Error('Invalid response from server. The policy data may contain formatting issues.');
+      }
 
       if (!response.ok) {
         throw new Error(data.details || data.error || `HTTP error! status: ${response.status}`);
@@ -213,9 +249,8 @@ export default function Home() {
       showToast('Response received!');
     } catch (error) {
       console.error("Error sending message:", error);
-      const errorMessage = error.message.includes('invalid_deployment') 
-        ? 'The Azure OpenAI deployment is not configured correctly. Please check the ASSISTANT_ID and ensure the deployment exists in your Azure OpenAI resource.'
-        : error.message || 'I apologize, but I\'m having trouble connecting to the PolicyTech database. Please try again or contact IT support if the issue persists.';
+      const messageText = typeof error === 'string' ? error : error?.message;
+      let errorMessage = messageText || 'I apologize, but I\'m having trouble connecting to the PolicyTech database. Please try again or contact IT support if the issue persists.';
       
       setMessages(prev => [...prev, {
         type: 'error',
@@ -232,7 +267,7 @@ export default function Home() {
     setInputValue('');
     setMessages([]);
     try {
-      await fetch('/api/chat', {
+      await fetch('/api/azure-agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: 'reset', resetConversation: true })
@@ -244,7 +279,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-sand/10 to-sage/30 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-white to-sage/20 flex flex-col">
       {/* Toast Notification */}
       {toast && (
         <div 
@@ -268,91 +303,45 @@ export default function Home() {
         </div>
       )}
 
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-md shadow-sm border-b border-rush-gray/30 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <div className="flex items-center space-x-6">
-              <div className="flex-shrink-0">
-                <div className="flex items-center space-x-4">
-                  <div className="relative w-[120px] h-10">
-                    <Image 
-                      src="/images/rush-logo.jpg"
-                      alt="Rush University Medical Center"
-                      fill
-                      sizes="120px"
-                      priority
-                      className="object-contain"
-                    />
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-vitality rounded-full animate-pulse z-10"></div>
-                  </div>
-                  <div className="border-l border-rush-gray h-10"></div>
-                  <div>
-                    <h1 className="text-xl font-semibold text-legacy">Policy Chat</h1>
-                    <p className="text-sm text-rush-black font-georgia">Chat with all policies in PolicyTech</p>
-                  </div>
-                </div>
+      {/* Simple Header */}
+      <header className="bg-white border-b border-rush-gray/20 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-6xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="relative w-[110px] h-9">
+                <Image
+                  src="/images/rush-logo.jpg"
+                  alt="Rush University System for Health"
+                  fill
+                  sizes="110px"
+                  priority
+                  className="object-contain"
+                />
               </div>
+              <div className="h-8 w-px bg-rush-gray/30"></div>
+              <h1 className="text-xl font-semibold text-legacy">Policy Chat</h1>
             </div>
-            <div className="hidden md:flex items-center space-x-6 text-sm text-rush-black">
-              <div className="flex items-center space-x-2 px-3 py-1.5 bg-sage/50 rounded-full border border-growth/20">
-                <Sparkles className="w-4 h-4 text-growth" />
-                <span className="font-medium">AI-Powered</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <kbd className="px-2 py-1 text-xs font-mono bg-sage border border-growth/30 rounded text-legacy">⌘K</kbd>
-                <span className="text-xs text-rush-black">to focus</span>
-              </div>
+            <div className="flex items-center space-x-2 px-3 py-1.5 bg-sage/30 rounded-full border border-growth/20">
+              <div className="w-2 h-2 bg-growth rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-legacy">Ready</span>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-white via-sage/30 to-blush/20 py-12 border-b border-rush-gray/30">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-block mb-4">
-            <div className="flex items-center space-x-2 px-4 py-2 bg-white rounded-full shadow-md border border-growth/30">
-              <Shield className="h-4 w-4 text-growth" />
-              <span className="text-sm font-semibold text-legacy">Internal Use Only</span>
-            </div>
-          </div>
-          <h1 className="text-4xl font-bold text-legacy mb-4 tracking-tight voice-inventive">
-            Rush Policy Assistant
-          </h1>
-          <p className="text-lg text-rush-black mb-8 max-w-2xl mx-auto leading-relaxed voice-accessible font-georgia">
-            We're here to help you find the policies and information you need. Ask questions in your own words and get clear, reliable answers from over 1300 PolicyTech documents.
-          </p>
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-rush-black">
-            <div className="flex items-center space-x-2 transition-transform hover:scale-105 px-3 py-1.5 bg-sage/30 rounded-full">
-              <FileText className="h-4 w-4 text-growth" />
-              <span className="font-medium">1300+ PolicyTech Documents</span>
-            </div>
-            <div className="flex items-center space-x-2 transition-transform hover:scale-105 px-3 py-1.5 bg-sand/30 rounded-full">
-              <MessageSquare className="h-4 w-4 text-navy" />
-              <span className="font-medium">Natural Language Search</span>
-            </div>
-            <div className="flex items-center space-x-2 transition-transform hover:scale-105 px-3 py-1.5 bg-blush/30 rounded-full">
-              <Zap className="h-4 w-4 text-gold" />
-              <span className="font-medium">Instant AI Responses</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Chat Container */}
-      <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
-        <div className="bg-white rounded-2xl shadow-xl border-2 border-rush-gray/20 h-full max-h-[700px] flex flex-col overflow-hidden backdrop-blur-sm">
+      <div className="flex-1 max-w-6xl mx-auto w-full px-6 py-8">
+        <div className="bg-white rounded-xl shadow-lg border border-rush-gray/20 h-full max-h-[750px] flex flex-col">
           {/* Chat Header */}
-          <div className="border-b border-rush-gray/30 p-6 bg-gradient-to-r from-sage/20 to-sand/20">
+          <div className="border-b border-rush-gray/20 px-6 py-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-legacy mb-1">Policy Assistant Chat</h2>
-                <p className="text-sm text-rush-black font-georgia voice-accessible">Ask questions in your own words - we're here to help</p>
+                <h2 className="text-lg font-semibold text-legacy">Ask your policy question</h2>
+                <p className="text-sm text-rush-black/70 mt-1">Get answers from 1300+ PolicyTech documents</p>
               </div>
-              <div className="flex items-center space-x-2 px-3 py-1 bg-white rounded-full border border-growth/20">
-                <div className="w-2 h-2 bg-growth rounded-full animate-pulse"></div>
-                <span className="text-xs text-legacy font-medium">Online</span>
+              <div className="flex items-center space-x-2 px-3 py-1.5 bg-vitality/10 rounded-lg border border-vitality/30">
+                <Sparkles className="w-4 h-4 text-growth" />
+                <span className="text-xs font-medium text-legacy">GPT-5 Chat</span>
               </div>
             </div>
           </div>
@@ -360,34 +349,30 @@ export default function Home() {
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {messages.length === 0 ? (
-              <div className="text-center mt-8">
-                <div className="mb-8">
-                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-growth/20 to-sage rounded-2xl mb-4 border-2 border-vitality/30">
-                    <FileText className="w-10 h-10 text-growth" />
+              <div className="flex flex-col items-center justify-center h-full">
+                <div className="text-center max-w-2xl">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-sage/30 rounded-full mb-6">
+                    <FileText className="w-8 h-8 text-growth" />
                   </div>
-                  <p className="text-xl font-semibold text-legacy mb-2 voice-inventive">Let's find the policy answers you need</p>
-                  <p className="text-sm text-rush-black max-w-md mx-auto font-georgia voice-accessible">Choose a topic below or ask your own question - we're here to help</p>
-                </div>
+                  <p className="text-base text-rush-black/60 mb-8">
+                    Ask about HIPAA, PTO, infection control, remote work, or any Rush policy
+                  </p>
 
-                {/* Suggested Prompts */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto mt-8">
-                  {SUGGESTED_PROMPTS.map((prompt, index) => (
-                    <button
-                      key={index}
-                      onClick={() => sendMessage(null, prompt.text)}
-                      className="group p-4 bg-white border-2 border-rush-gray/30 rounded-xl hover:border-growth hover:bg-sage/20 transition-all duration-200 text-left transform hover:scale-105 hover:shadow-lg"
-                    >
-                      <div className="flex items-start space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-growth/10 to-vitality/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-growth/30 group-hover:to-vitality/40 transition-colors border border-growth/20">
-                          <prompt.icon className="w-5 h-5 text-growth" />
+                  {/* Suggested Prompts */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {SUGGESTED_PROMPTS.map((prompt, index) => (
+                      <button
+                        key={index}
+                        onClick={() => sendMessage(null, prompt.text)}
+                        className="p-4 bg-white border border-rush-gray/30 rounded-lg hover:border-growth hover:bg-sage/10 transition-all text-left"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <prompt.icon className="w-5 h-5 text-growth flex-shrink-0" />
+                          <span className="text-sm text-rush-black">{prompt.text}</span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-legacy mb-1">{prompt.category}</p>
-                          <p className="text-sm text-rush-black font-medium line-clamp-2 voice-inclusive">{prompt.text}</p>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             ) : (
@@ -424,101 +409,106 @@ export default function Home() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-start space-x-3 w-full max-w-3xl">
-                      <div className="w-10 h-10 bg-gradient-to-br from-growth to-legacy rounded-xl flex items-center justify-center flex-shrink-0 shadow-md border border-vitality/40">
+                    // PDF-Style Single Document
+                    <div className="flex items-start space-x-3 w-full max-w-4xl">
+                      <div className="w-10 h-10 bg-gradient-to-br from-growth to-legacy rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
                         <FileText className="w-5 h-5 text-white" />
                       </div>
-                      <div className="flex-1 space-y-4">
+                      <div className="flex-1">
                         {(() => {
-                          const { synthesizedAnswer, fullDocument } = parseResponse(message.content);
+                          const { content, metadata } = parseResponse(message.content);
 
                           return (
-                            <>
-                              {/* AI Synthesized Answer */}
-                              {synthesizedAnswer && (
-                                <div className="bg-white rounded-2xl shadow-lg border-2 border-sky-blue/30 overflow-hidden hover:shadow-xl transition-shadow">
-                                  <div className="bg-gradient-to-r from-sky-blue to-navy px-6 py-4">
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center space-x-2">
-                                        <Sparkles className="w-5 h-5 text-white" />
-                                        <h3 className="font-semibold text-white voice-invested">AI Assistant Response</h3>
-                                      </div>
-                                      <button
-                                        onClick={() => copyToClipboard(synthesizedAnswer, `synth-${index}`)}
-                                        className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                                        title="Copy to clipboard"
-                                        aria-label="Copy response to clipboard"
-                                      >
-                                        {copiedIndex === `synth-${index}` ? (
-                                          <CheckCheck className="w-4 h-4 text-white" aria-hidden="true" />
-                                        ) : (
-                                          <Copy className="w-4 h-4 text-white" aria-hidden="true" />
-                                        )}
-                                      </button>
-                                    </div>
-                                    <p className="text-white/80 text-sm mt-1 font-georgia">Direct answer to your question</p>
-                                  </div>
-                                  <div className="p-6 bg-gradient-to-b from-white to-sage/10">
-                                    <div className="text-rush-black leading-relaxed font-georgia voice-accessible">
-                                      {synthesizedAnswer.split('\n').map((paragraph, idx) => (
-                                        paragraph.trim() && (
-                                          <p key={idx} className="mb-3 last:mb-0">{paragraph.trim()}</p>
-                                        )
-                                      ))}
+                            <div className="pdf-document-container">
+                              {/* PDF Document Header */}
+                              <div className="pdf-header">
+                                <div className="flex items-center justify-between mb-4">
+                                  <div className="flex items-center space-x-3">
+                                    <img src="/images/rush-logo.jpg" alt="Rush" className="h-8 object-contain" />
+                                    <div className="border-l border-rush-gray h-8"></div>
+                                    <div>
+                                      <h3 className="font-semibold text-legacy text-lg">Rush University Policy Document</h3>
+                                      <p className="text-xs text-rush-black/70">PolicyTech Database</p>
                                     </div>
                                   </div>
-                                </div>
-                              )}
-
-                              {/* Full Policy Document */}
-                              <div className="bg-white border-2 border-rush-gray/30 shadow-lg overflow-hidden rounded-2xl hover:shadow-xl transition-shadow">
-                                {/* Document Header */}
-                                <div className="bg-gradient-to-r from-sand/20 to-sage/20 px-6 py-4 border-b border-rush-gray/30">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-2">
-                                      <FileText className="w-5 h-5 text-legacy" />
-                                      <h3 className="font-semibold text-legacy">Rush University System for Health Policy Document</h3>
-                                    </div>
-                                    <button
-                                      onClick={() => copyToClipboard(fullDocument, `doc-${index}`)}
-                                      className="p-2 hover:bg-sage/30 rounded-lg transition-colors"
-                                      title="Copy document"
-                                      aria-label="Copy full document to clipboard"
-                                    >
-                                      {copiedIndex === `doc-${index}` ? (
-                                        <CheckCheck className="w-4 h-4 text-growth" aria-hidden="true" />
-                                      ) : (
-                                        <Copy className="w-4 h-4 text-legacy" aria-hidden="true" />
-                                      )}
-                                    </button>
-                                  </div>
-                                  <p className="text-xs text-rush-black mt-1 font-georgia">PolicyTech Database - Official Document</p>
+                                  <button
+                                    onClick={() => copyToClipboard(content, `doc-${index}`)}
+                                    className="pdf-copy-button"
+                                    title="Copy document"
+                                    aria-label="Copy document to clipboard"
+                                  >
+                                    {copiedIndex === `doc-${index}` ? (
+                                      <>
+                                        <CheckCheck className="w-4 h-4" aria-hidden="true" />
+                                        <span>Copied</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Copy className="w-4 h-4" aria-hidden="true" />
+                                        <span>Copy</span>
+                                      </>
+                                    )}
+                                  </button>
                                 </div>
 
-                                {/* Document Content - Clean White Document Format */}
-                                <div className="p-8 bg-white">
-                                  <div className="policy-document">
-                                    {formatDocumentContent(fullDocument)}
+                                {/* Metadata Bar */}
+                                {(metadata.policyNumber || metadata.policyTitle || metadata.effectiveDate || metadata.department) && (
+                                  <div className="pdf-metadata-bar">
+                                    {metadata.policyNumber && (
+                                      <span className="pdf-badge">
+                                        <FileText className="w-3 h-3" />
+                                        Policy #{metadata.policyNumber}
+                                      </span>
+                                    )}
+                                    {metadata.effectiveDate && (
+                                      <span className="pdf-badge">
+                                        <Clock className="w-3 h-3" />
+                                        {metadata.effectiveDate}
+                                      </span>
+                                    )}
+                                    {metadata.department && (
+                                      <span className="pdf-badge">
+                                        <Building2 className="w-3 h-3" />
+                                        {metadata.department}
+                                      </span>
+                                    )}
                                   </div>
+                                )}
+                              </div>
 
-                                  {/* Document Footer */}
-                                  <div className="mt-8 pt-4 border-t border-wash-green">
-                                    <div className="text-xs text-wash-gray space-y-1">
-                                      <p>📄 Source: Rush University System PolicyTech Database</p>
-                                      <p>🔒 Access Level: Authorized Rush Personnel Only</p>
-                                      <p>📅 Retrieved: {message.timestamp?.toLocaleDateString('en-US', {
+                              {/* PDF Document Body */}
+                              <div className="pdf-body">
+                                {formatDocumentContent(content)}
+                              </div>
+
+                              {/* PDF Document Footer */}
+                              <div className="pdf-footer">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-rush-black/70">
+                                  <div>
+                                    <div className="mb-1">
+                                      <span className="font-semibold">Source:</span> Rush PolicyTech Database
+                                    </div>
+                                    <div>
+                                      <span className="font-semibold">Access:</span> Authorized Personnel Only
+                                    </div>
+                                  </div>
+                                  <div className="md:text-right">
+                                    <div className="mb-1">
+                                      <span className="font-semibold">Retrieved:</span> {message.timestamp?.toLocaleDateString('en-US', {
                                         year: 'numeric',
-                                        month: 'long',
+                                        month: 'short',
                                         day: 'numeric',
                                         hour: '2-digit',
                                         minute: '2-digit'
-                                      })}</p>
-                                      <p>⚠️ This document is the property of Rush University System for Health</p>
+                                      })}
+                                    </div>
+                                    <div>
+                                      <span className="font-semibold">Property of:</span> Rush University System for Health
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            </>
+                            </div>
                           );
                         })()}
                       </div>
@@ -550,83 +540,55 @@ export default function Home() {
           </div>
 
           {/* Chat Input */}
-          <div className="border-t border-rush-gray/30 p-6 bg-gradient-to-r from-sand/20 to-sage/20">
+          <div className="border-t border-rush-gray/20 p-6 bg-white">
             <form onSubmit={sendMessage} className="flex space-x-3">
-              <div className="flex-1 relative">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Type your question here - we're ready to help..."
-                  className="w-full border-2 border-rush-gray/40 rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-growth focus:border-growth transition-all duration-200 bg-white text-rush-black placeholder-rush-gray text-base shadow-sm hover:border-growth/50 font-georgia"
-                  disabled={isLoading}
-                  aria-label="Ask a policy question"
-                />
-                {inputValue && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-rush-black font-medium">
-                    Press Enter ↵
-                  </div>
-                )}
-              </div>
+              <input
+                ref={inputRef}
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="Ask a policy question..."
+                className="flex-1 border border-rush-gray/30 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-growth focus:border-growth transition-all bg-white text-rush-black placeholder-rush-gray/60"
+                disabled={isLoading}
+                aria-label="Ask a policy question"
+              />
               <button
                 type="submit"
                 disabled={isLoading || !inputValue.trim()}
-                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed px-8 min-w-[120px]"
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed px-6"
                 aria-label="Send message"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
-                    <span className="hidden sm:inline ml-2 voice-invested">Searching...</span>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span className="ml-2">Searching...</span>
                   </>
                 ) : (
                   <>
-                    <Send className="w-5 h-5" aria-hidden="true" />
-                    <span className="hidden sm:inline ml-2 voice-invested">Send</span>
+                    <Send className="w-5 h-5" />
+                    <span className="ml-2">Send</span>
                   </>
                 )}
               </button>
-              <button
-                type="button"
-                onClick={handleClear}
-                className="btn-secondary px-6"
-                disabled={messages.length === 0 && !inputValue}
-                aria-label="Clear conversation"
-              >
-                Clear
-              </button>
+              {messages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="btn-secondary px-4"
+                  aria-label="Clear conversation"
+                >
+                  Clear
+                </button>
+              )}
             </form>
-            <div className="mt-3 flex items-center justify-between text-xs">
-              <div className="flex items-center space-x-4 text-rush-black">
-                <span className="font-georgia">💡 Quick tip: Press ⌘K to jump to the search box</span>
-              </div>
-              <div className="flex items-center space-x-2 px-2 py-1 bg-white rounded-full border border-growth/20">
-                <div className="w-1.5 h-1.5 bg-growth rounded-full animate-pulse"></div>
-                <span className="text-legacy font-medium">Ready to help</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="mt-4 py-6 text-center text-sm border-t border-rush-gray/30 bg-gradient-to-r from-sage/10 to-sand/10">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="flex items-center justify-center space-x-2 mb-2">
-            <Shield className="w-4 h-4 text-growth" />
-            <span className="font-semibold text-legacy">Internal Rush University System Policy Assistant</span>
-          </div>
-          <p className="text-xs text-rush-black font-georgia">Powered by Azure OpenAI GPT-4 • Secure & Confidential</p>
-          <div className="mt-2 flex items-center justify-center space-x-3 text-xs text-rush-black">
-            <span>Inclusive</span>
-            <span>•</span>
-            <span>Invested</span>
-            <span>•</span>
-            <span>Inventive</span>
-            <span>•</span>
-            <span>Accessible</span>
-          </div>
+      <footer className="py-4 text-center text-xs text-rush-black/60 border-t border-rush-gray/20">
+        <div className="max-w-6xl mx-auto px-6">
+          <p>Rush University System for Health • Internal Use Only • Powered by Azure GPT-5 Chat Model</p>
         </div>
       </footer>
 

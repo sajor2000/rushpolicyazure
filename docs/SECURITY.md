@@ -7,9 +7,9 @@ This Rush Policy Chat Assistant is a **BETA DEMONSTRATION** built by Juan C. Roj
 ## Security Features
 
 ### 🔐 Infrastructure Security
-- **Azure OpenAI Service**: Enterprise-grade secure AI infrastructure
+- **Azure AI Service**: Enterprise-grade secure AI infrastructure with GPT-4.5-Chat Model
 - **TLS 1.3 Encryption**: All data in transit is encrypted
-- **Azure Key Vault Standards**: API keys managed securely
+- **Managed Identity Authentication**: Zero API keys stored (authentication via Azure AD)
 - **No PHI Processing**: System does not handle patient data
 
 ### 🛡️ Application Security
@@ -47,7 +47,7 @@ Before production use, ensure:
 
 For security concerns or questions about this demo:
 - **Author**: Juan C. Rojas MD, MS
-- **Department**: Internal Medicine, Rush University Medical Center
+- **Department**: Internal Medicine, Rush University System for Health
 
 ---
 

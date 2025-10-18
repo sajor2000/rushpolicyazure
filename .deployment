@@ -1,0 +1,8 @@
+[config]
+# Azure App Service deployment configuration for Next.js
+
+# Use Node.js for building
+SCM_DO_BUILD_DURING_DEPLOYMENT=true
+
+# Custom build command
+command = bash -c "npm install && npm run build"

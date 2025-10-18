@@ -76,6 +76,112 @@ p, span, div, body {
   @apply font-georgia;
 }
 
+/* PDF-Style Document Components */
+.pdf-document-container {
+  @apply bg-white shadow-lg border border-rush-gray/20 rounded-lg overflow-hidden;
+}
+
+.pdf-header {
+  @apply bg-white border-b border-rush-gray/20 px-6 py-4;
+}
+
+.pdf-copy-button {
+  @apply flex items-center space-x-2 px-4 py-2 text-sm font-medium text-legacy
+         bg-sage/10 hover:bg-sage/20 border border-legacy/20 rounded-lg
+         transition-all duration-200 hover:shadow-md;
+}
+
+.pdf-metadata-bar {
+  @apply flex flex-wrap gap-2 pt-3 border-t border-rush-gray/10;
+}
+
+.pdf-badge {
+  @apply inline-flex items-center space-x-1 px-3 py-1.5
+         bg-sage/10 text-legacy text-xs font-medium rounded-full border border-growth/20;
+}
+
+.pdf-body {
+  @apply px-8 py-6 bg-white;
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.8;
+  color: #5F5858;
+}
+
+.pdf-footer {
+  @apply px-6 py-4 bg-sage/5 border-t border-rush-gray/10;
+}
+
+/* PDF Typography Styles */
+.pdf-section-header {
+  @apply text-lg font-bold text-legacy mb-4 mt-6 first:mt-0 pb-2 border-b border-growth/20;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.pdf-subsection-header {
+  @apply text-base font-semibold text-legacy mb-3 mt-4;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.pdf-metadata-line {
+  @apply flex items-baseline gap-2 mb-2 text-sm;
+}
+
+.pdf-metadata-key {
+  @apply font-semibold text-legacy shrink-0;
+  min-width: 140px;
+}
+
+.pdf-metadata-value {
+  @apply text-rush-black;
+}
+
+.pdf-paragraph {
+  @apply mb-4 text-sm leading-relaxed text-rush-black;
+  text-align: justify;
+  hyphens: auto;
+}
+
+.pdf-list-item {
+  @apply flex items-start gap-3 mb-2 ml-4 text-sm text-rush-black;
+}
+
+.pdf-bullet {
+  @apply text-growth font-bold shrink-0;
+  margin-top: 2px;
+}
+
+.pdf-numbered-item {
+  @apply mb-2 ml-6 text-sm text-rush-black leading-relaxed;
+}
+
+.pdf-blockquote {
+  @apply pl-4 py-2 my-4 border-l-4 border-growth/30 bg-sage/5 text-sm italic text-rush-black/90;
+}
+
+.pdf-separator {
+  @apply my-6 border-t border-rush-gray/20;
+}
+
+.pdf-notice {
+  @apply px-4 py-3 my-4 bg-gold/10 border-l-4 border-gold rounded-r text-sm text-rush-black;
+}
+
+/* Print Styles for PDF Export */
+@media print {
+  .pdf-document-container {
+    @apply shadow-none border-0;
+  }
+
+  .pdf-copy-button {
+    @apply hidden;
+  }
+
+  .pdf-body {
+    @apply px-0;
+  }
+}
+
 /* Brand Voice Utilities */
 .voice-inclusive {
   /* Real, genuine, collaborative tone */
@@ -373,4 +479,407 @@ a:focus {
 .theme-growth {
   /* Inspiring, momentum-driven tone for professional development */
   @apply bg-sand/10;
+}
+
+/* ========================================
+   PolicyTech Native Document Formatting
+   Reproduces exact formatting from Rush PolicyTech PDFs
+   ======================================== */
+
+.policytech-document {
+  font-family: 'Calibri', 'Arial', sans-serif;
+  font-size: 11pt;
+  line-height: 1.4;
+  color: #000000;
+  background: white;
+  max-width: 8.5in;
+  margin: 0 auto;
+  padding: 0.5in;
+}
+
+/* PolicyTech Header Block */
+.policytech-header {
+  border: 2px solid #000;
+  padding: 12px;
+  margin-bottom: 16px;
+  background: #f8f8f8;
+}
+
+.policytech-header-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ccc;
+}
+
+.policytech-header-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.policytech-title-block {
+  font-weight: bold;
+  font-size: 11pt;
+}
+
+.policytech-meta-label {
+  font-weight: bold;
+  display: inline;
+}
+
+.policytech-meta-value {
+  display: inline;
+  margin-left: 4px;
+}
+
+.policytech-checkbox-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-size: 10pt;
+  margin-top: 8px;
+}
+
+.policytech-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.policytech-notice {
+  text-align: center;
+  color: #cc0000;
+  font-style: italic;
+  font-size: 10pt;
+  margin: 12px 0;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  padding: 8px 0;
+}
+
+/* Section Headers - Roman Numerals */
+.policytech-section-major {
+  font-weight: bold;
+  font-size: 13pt;
+  color: #000;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  text-decoration: underline;
+}
+
+.policytech-section-major::before {
+  /* Roman numeral added in content */
+  margin-right: 12px;
+}
+
+/* Numbered Lists */
+.policytech-list-level-1 {
+  margin-left: 0;
+  margin-bottom: 8px;
+}
+
+.policytech-list-level-2 {
+  margin-left: 30px;
+  margin-bottom: 6px;
+}
+
+.policytech-list-level-3 {
+  margin-left: 60px;
+  margin-bottom: 4px;
+}
+
+.policytech-list-level-4 {
+  margin-left: 90px;
+  margin-bottom: 4px;
+}
+
+/* List Item Numbering Styles */
+.policytech-number-arabic {
+  /* 1, 2, 3 */
+  font-weight: bold;
+}
+
+.policytech-number-alpha {
+  /* a, b, c */
+  font-weight: normal;
+}
+
+.policytech-number-roman-lower {
+  /* i, ii, iii */
+  font-weight: normal;
+  font-style: italic;
+}
+
+.policytech-number-numeric {
+  /* 1., 2., 3. */
+  font-weight: normal;
+}
+
+/* Definition Lists */
+.policytech-definition-term {
+  font-weight: bold;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+.policytech-definition-text {
+  margin-left: 20px;
+  text-align: justify;
+}
+
+/* Equipment Lists and Bullet Points */
+.policytech-bullet-list {
+  margin-left: 30px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.policytech-bullet-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.policytech-bullet-item::before {
+  content: "•";
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.policytech-circle-item::before {
+  content: "○";
+  flex-shrink: 0;
+}
+
+/* Nested Lists */
+.policytech-nested-list {
+  margin-left: 25px;
+  margin-top: 4px;
+}
+
+/* Procedure Steps */
+.policytech-procedure-step {
+  margin-bottom: 12px;
+  text-align: justify;
+}
+
+.policytech-procedure-number {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+/* Tables (if present in policy) */
+.policytech-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 10pt;
+}
+
+.policytech-table th {
+  background: #f0f0f0;
+  border: 1px solid #000;
+  padding: 6px;
+  font-weight: bold;
+  text-align: left;
+}
+
+.policytech-table td {
+  border: 1px solid #000;
+  padding: 6px;
+  vertical-align: top;
+}
+
+/* Reference Links */
+.policytech-reference-link {
+  color: #0066cc;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.policytech-reference-link:hover {
+  color: #004499;
+}
+
+/* Appendix References */
+.policytech-appendix-ref {
+  font-style: italic;
+  color: #0066cc;
+}
+
+/* Special Formatting */
+.policytech-bold {
+  font-weight: bold;
+}
+
+.policytech-italic {
+  font-style: italic;
+}
+
+.policytech-underline {
+  text-decoration: underline;
+}
+
+.policytech-indent-1 {
+  margin-left: 30px;
+}
+
+.policytech-indent-2 {
+  margin-left: 60px;
+}
+
+.policytech-indent-3 {
+  margin-left: 90px;
+}
+
+/* Page Break Control for Printing */
+.policytech-page-break-before {
+  page-break-before: always;
+}
+
+.policytech-page-break-avoid {
+  page-break-inside: avoid;
+}
+
+/* Footer Section */
+.policytech-footer {
+  margin-top: 30px;
+  padding-top: 16px;
+  border-top: 2px solid #000;
+  font-size: 10pt;
+}
+
+.policytech-reference-number {
+  text-align: right;
+  font-size: 9pt;
+  color: #666;
+  margin-top: 8px;
+}
+
+/* Enhanced PDF Body for PolicyTech Style */
+.pdf-body-policytech {
+  font-family: 'Calibri', 'Arial', sans-serif;
+  font-size: 11pt;
+  line-height: 1.4;
+  color: #000;
+  padding: 20px 30px;
+  background: white;
+}
+
+/* Section Dividers */
+.policy-divider {
+  border: 0;
+  height: 2px;
+  background: linear-gradient(to right, #006332, #30AE6E, #006332);
+  margin: 20px 0;
+}
+
+/* Checkbox Styles */
+.policy-checkbox-checked::before {
+  content: "☒";
+  margin-right: 4px;
+}
+
+.policy-checkbox-unchecked::before {
+  content: "☐";
+  margin-right: 4px;
+}
+
+/* Code/Reference Block */
+.policy-code-block {
+  background: #f5f5f5;
+  border-left: 4px solid #30AE6E;
+  padding: 12px;
+  margin: 12px 0;
+  font-family: 'Courier New', monospace;
+  font-size: 10pt;
+}
+
+/* Print Optimization for PolicyTech Documents */
+@media print {
+  .policytech-document {
+    padding: 0;
+    max-width: 100%;
+  }
+
+  .policytech-header {
+    border: 2px solid #000;
+    background: white;
+  }
+
+  .policytech-section-major {
+    page-break-after: avoid;
+  }
+
+  .policytech-procedure-step {
+    page-break-inside: avoid;
+  }
+}
+
+/* ========================================
+   Quick Answer & Expandable Document Styles
+   Enhanced UX with answer-first format
+   ======================================== */
+
+.quick-answer-card {
+  background: linear-gradient(135deg, #DFF9EB 0%, #ffffff 100%);
+  border-left: 4px solid #30AE6E;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 99, 50, 0.08);
+  animation: slideInFromLeft 0.3s ease-out;
+}
+
+.quick-answer-card p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #5F5858;
+  font-weight: 400;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.document-expander {
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.document-expander.collapsed {
+  max-height: 0;
+}
+
+.document-expander.expanded {
+  max-height: 100000px;
+}
+
+.expand-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.expand-button:hover {
+  background-color: rgba(48, 174, 110, 0.1);
+}
+
+.expand-button svg {
+  transition: transform 0.2s ease;
+}
+
+.expand-button:hover svg {
+  transform: scale(1.1);
 }

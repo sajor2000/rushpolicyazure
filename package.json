@@ -9,9 +9,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:azure": "node .next/standalone/server.js",
     "lint": "next lint"
   },
   "dependencies": {
+    "@azure/ai-agents": "^1.0.0-beta.1",
+    "@azure/ai-projects": "^1.0.1",
+    "@azure/identity": "^4.0.0",
     "dotenv": "^16.5.0",
     "lucide-react": "^0.263.1",
     "next": "14.0.0",

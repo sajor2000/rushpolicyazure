@@ -1,8 +1,8 @@
 # Rush Policy Assistant
 
-An AI-powered chat interface for Rush University Medical Center staff to query official policy documents. Built with Next.js 14, Azure OpenAI GPT-4, and implementing complete Rush University brand guidelines with WCAG AA accessibility compliance.
+An AI-powered chat interface for Rush University System for Health staff to query official policy documents. Built with Next.js 14, Azure GPT-5 Chat Model, and implementing complete Rush University brand guidelines with WCAG AA accessibility compliance.
 
-![Rush University Medical Center](https://img.shields.io/badge/Rush-University-006332)
+![Rush University System for Health](https://img.shields.io/badge/Rush-University-006332)
 ![Next.js](https://img.shields.io/badge/Next.js-14.0-black)
 ![WCAG](https://img.shields.io/badge/WCAG-AA-30AE6E)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -24,7 +24,7 @@ An AI-powered chat interface for Rush University Medical Center staff to query o
 
 ### 🚀 Production Features
 - **1300+ PolicyTech Documents**: Semantic search through Rush University policies from PolicyTech
-- **AI-Powered Responses**: Azure OpenAI GPT-4 with Assistants API
+- **AI-Powered Responses**: Azure GPT-5 Chat Model with Assistants API
 - **Real-time Chat**: Streaming responses with conversation context
 - **Copy Functionality**: One-click copy for responses and documents
 - **Toast Notifications**: Real-time feedback with accessibility
@@ -34,17 +34,17 @@ An AI-powered chat interface for Rush University Medical Center staff to query o
 ## 🏗️ Tech Stack
 
 - **Frontend**: Next.js 14 (App Router), React 18, Tailwind CSS
-- **AI**: Azure OpenAI GPT-4 (Assistants API)
+- **AI**: Azure GPT-5 Chat Model (Assistants API)
 - **Typography**: Google Fonts (Montserrat, Source Sans 3, Georgia)
 - **Icons**: Lucide React
-- **Deployment**: Replit (Autoscale), Vercel-ready
+- **Deployment**: Azure Web Apps, Replit (Autoscale), Vercel-ready
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- Azure OpenAI account with Assistants API access
-- Rush University policy documents vector store
+- Node.js 18+
+- Azure AI account with GPT-4.5-Chat Model and Assistants API access
+- Rush University policy documents vector store (1300+ PolicyTech documents)
 
 ### Installation
 
@@ -62,9 +62,9 @@ npm install
 3. **Set up environment variables**
 Create a `.env.local` file in the root directory:
 ```env
-AZURE_OPENAI_API_KEY=your_azure_openai_api_key
-AZURE_OPENAI_ENDPOINT=your_azure_openai_endpoint
-ASSISTANT_ID=your_assistant_id
+AZURE_AI_ENDPOINT=your_azure_ai_endpoint
+AZURE_AI_AGENT_ID=your_agent_id
+# Note: Authentication via Azure CLI or Managed Identity (no API keys required)
 ```
 
 4. **Run the development server**
@@ -131,11 +131,12 @@ Rush Gray:  #AFAEAF  // Secondary text (use with caution for contrast)
 
 ## 🔒 Security
 
-- All API keys stored in environment variables (never committed)
-- Azure OpenAI enterprise security with TLS 1.3 encryption
+- Managed Identity authentication (zero API keys stored)
+- Azure AI enterprise security with TLS 1.3 encryption
 - Input validation and sanitization
 - No PHI (Protected Health Information) processing
 - Ephemeral conversations (no persistent user data)
+- All environment variables secured via Azure Key Vault
 
 See [SECURITY.md](docs/SECURITY.md) for detailed security practices.
 
@@ -179,8 +180,8 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 ## 🙏 Acknowledgments
 
-- Rush University Medical Center for brand guidelines
-- Azure OpenAI for GPT-4 Assistants API
+- Rush University System for Health for brand guidelines
+- Azure AI for GPT-4.5-Chat Model and Assistants API
 - Next.js team for the excellent framework
 
 ## 📞 Support
@@ -191,4 +192,4 @@ For technical issues or questions:
 
 ---
 
-**Built with ❤️ for Rush University Medical Center**
+**Built with ❤️ for Rush University System for Health**
