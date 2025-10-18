@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Rush Policy Assistant is a Next.js 14 application providing AI-powered chat interface for Rush University System for Health staff to query 1300+ official PolicyTech documents. The application uses Azure GPT-4.5-Chat Model via Azure AI Agent with complete Rush University brand implementation and WCAG AA accessibility compliance.
+Rush Policy Assistant is a Next.js 14 application providing AI-powered chat interface for Rush University System for Health staff to query 1300+ official PolicyTech documents. The application uses Azure GPT-5 Chat Model via Azure AI Agent with complete Rush University brand implementation and WCAG AA accessibility compliance.
 
 ## Development Commands
 
@@ -33,11 +33,11 @@ node scripts/test-azure-agent.js
 ## Architecture Overview
 
 ### AI Backend System
-The application uses Azure GPT-4.5-Chat Model via Azure AI Agent:
+The application uses Azure GPT-5 Chat Model via Azure AI Agent:
 
 1. **Azure AI Agent** (Production): Uses `@azure/ai-projects` SDK with `DefaultAzureCredential`
    - Endpoint: [app/api/azure-agent/route.js](app/api/azure-agent/route.js)
-   - Model: Azure GPT-4.5-Chat (latest generation)
+   - Model: Azure GPT-5 Chat (latest generation)
    - Authenticates via Azure credentials (CLI, Managed Identity, Environment Variables)
    - Agent ID: `asst_301EhwakRXWsOCgGQt276WiU` (Policy_Tech_V1)
    - Thread management: In-memory (stateless between restarts)

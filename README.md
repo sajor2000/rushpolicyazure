@@ -43,7 +43,7 @@ An AI-powered chat interface for Rush University System for Health staff to quer
 
 ### Prerequisites
 - Node.js 18+
-- Azure AI account with GPT-4.5-Chat Model and Assistants API access
+- Azure AI account with GPT-5 Chat Model and Assistants API access
 - Rush University policy documents vector store (1300+ PolicyTech documents)
 
 ### Installation
@@ -181,7 +181,7 @@ MIT License - See [LICENSE](LICENSE) for details.
 ## 🙏 Acknowledgments
 
 - Rush University System for Health for brand guidelines
-- Azure AI for GPT-4.5-Chat Model and Assistants API
+- Azure AI for GPT-5 Chat Model and Assistants API
 - Next.js team for the excellent framework
 
 ## 📞 Support
