@@ -68,3 +68,18 @@ test-*.js
 .next/
 out/
 dist/
+
+# Replit-specific files
+.replit
+replit.nix
+.upm/
+.cache/
+.config/
+/tmp/
+
+# Temporary assets and test files
+attached_assets/
+assets/docs/
+
+# Replit logs
+*.replit.log
