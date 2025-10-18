@@ -86,3 +86,11 @@ assets/docs/
 
 # Replit logs
 *.replit.log
+
+# AI assistant directories
+.vincent/
+
+# Temporary documentation files
+*_COMPLETE.md
+*_READY.md
+*_SUMMARY.md
