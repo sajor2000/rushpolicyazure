@@ -393,7 +393,7 @@ export default function Home() {
                     <div className="flex items-start space-x-3 justify-end max-w-2xl">
                       <div className="bg-gradient-to-br from-navy to-purple rounded-2xl px-5 py-4 shadow-lg hover:shadow-xl transition-shadow border border-navy/20">
                         <p className="text-white font-medium voice-inclusive">{message.content}</p>
-                        <p className="text-sky-blue/80 text-xs mt-2 font-georgia">{message.timestamp?.toLocaleTimeString()}</p>
+                        <p className="text-white/90 text-xs mt-2 font-georgia">{message.timestamp?.toLocaleTimeString()}</p>
                       </div>
                       <div className="w-10 h-10 bg-gradient-to-br from-navy to-purple rounded-xl flex items-center justify-center flex-shrink-0 shadow-md border border-violet/30">
                         <User className="w-5 h-5 text-white" />
