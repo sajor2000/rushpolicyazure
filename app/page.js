@@ -280,6 +280,7 @@ export default function Home() {
                       src="/images/rush-logo.jpg"
                       alt="Rush University Medical Center"
                       fill
+                      sizes="120px"
                       priority
                       className="object-contain"
                     />
