@@ -40,7 +40,8 @@ The application uses Azure GPT-5 Chat Model via Azure AI Agent:
    - Model: Azure GPT-5 Chat (latest generation)
    - Authenticates via Azure credentials (CLI, Managed Identity, Environment Variables)
    - Agent ID: `asst_301EhwakRXWsOCgGQt276WiU` (Policy_Tech_V1)
-   - Thread management: In-memory (stateless between restarts)
+   - Thread management: **Stateless** (fresh thread created for every request - zero conversation history)
+   - RAG Architecture: Every question triggers fresh database search with no context bleed-over
    - Zero API keys required (Managed Identity authentication)
 
 ### Response Format Protocol
@@ -73,6 +74,60 @@ app/api/
 ├── health/          # Health check endpoint
 ├── reset/           # Conversation reset endpoint
 └── test-env/        # Environment validation endpoint
+```
+
+## RAG Architecture & Zero-Hallucination Design
+
+### Critical Design Principles
+
+**The system is optimized for maximum RAG accuracy and zero hallucinations through:**
+
+1. **Stateless Thread Architecture** ([app/api/azure-agent/route.js:15-23](app/api/azure-agent/route.js#L15-L23))
+   - Every request creates a fresh conversation thread
+   - No thread storage or caching between requests
+   - Zero conversation history between questions
+   - Ensures every query triggers a fresh RAG database search
+
+2. **Zero-Hallucination Prompt Engineering** ([app/api/azure-agent/route.js:56-76](app/api/azure-agent/route.js#L56-L76))
+   - Explicit instructions to never paraphrase or infer
+   - Forbidden phrases list to prevent common hallucination patterns
+   - Requirement for verbatim quotes with citations
+   - Fallback message when information not in RAG database
+
+3. **RAG Accuracy Monitoring** ([app/api/azure-agent/route.js:253-293](app/api/azure-agent/route.js#L253-L293))
+   - Citation count validation (warns if zero citations)
+   - Fresh thread confirmation logging
+   - Response structure validation (two-part format)
+   - Suspicious phrase detection (e.g., "I believe", "typically")
+
+4. **Response Post-Processing** ([app/api/azure-agent/route.js:227-248](app/api/azure-agent/route.js#L227-L248))
+   - Extracts citation marks 【source†file.pdf】 from body
+   - Removes `**` markdown formatting
+   - Cleans excessive whitespace
+   - Relocates citations to dedicated footer section
+
+### Why This Matters
+
+**Problem**: Traditional conversational AI can hallucinate when:
+- Using previous conversation context instead of searching fresh
+- Paraphrasing policy text instead of quoting verbatim
+- Inferring information not present in source documents
+
+**Solution**: Our stateless architecture ensures:
+- ✅ Every question = fresh RAG search
+- ✅ No context bleed-over between questions
+- ✅ Only verbatim quotes from PolicyTech documents
+- ✅ Citations prove every factual statement
+
+### Monitoring & Validation
+
+Check server logs for RAG validation markers:
+```
+✅ RAG VALIDATION: Found 3 citations
+✅ RAG VALIDATION: Fresh thread created for this request (ID: thread_abc123)
+✅ RAG VALIDATION: Response has correct two-part structure
+⚠️ RAG WARNING: No citations found in response - possible hallucination
+⚠️ RAG WARNING: Response contains suspicious phrases: ['typically']
 ```
 
 ## Environment Configuration
@@ -139,11 +194,21 @@ Neutrals: 'rush-black' (#5F5858), 'rush-gray' (#AFAEAF)
 - Accessible with aria-live regions
 
 ### Thread Management
-Both AI backends maintain conversation context via threads:
+
+**Azure AI Agent (Primary)**:
+- **Stateless architecture**: Creates a fresh thread for EVERY request
+- **No thread reuse**: Zero conversation history between questions
+- **No thread storage**: Threads are never cached or persisted
+- **Purpose**: Ensures every query triggers a fresh RAG database search for maximum accuracy
+
+**OpenAI Assistant (Legacy)**:
+- **Stateful architecture**: Maintains conversation context via threads
 - **Thread creation**: On first message or after reset
 - **Thread reuse**: Same thread for subsequent messages in conversation
-- **Thread reset**: Via "Clear Conversation" button or `resetConversation: true` in request
-- **Storage**: In-memory (lost on server restart) - production should use Redis/database
+- **Thread reset**: Via "Clear Conversation" button
+- **Storage**: In-memory (lost on server restart)
+
+**Note**: The Azure AI Agent's stateless design prevents hallucinations by forcing fresh RAG searches. The OpenAI Assistant endpoint maintains state for conversational continuity but may be less accurate for policy retrieval.
 
 ## Deployment
 

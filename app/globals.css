@@ -268,20 +268,20 @@ p, span, div, body {
   @apply px-6 py-4 bg-sage/5 border-t border-rush-gray/10;
 }
 
-/* PDF Typography Styles */
+/* PDF Typography Styles - Tighter spacing for better readability */
 .pdf-section-header {
-  @apply text-lg font-bold text-legacy mb-4 mt-6 first:mt-0 pb-2 border-b border-growth/20;
+  @apply text-lg font-bold text-legacy mb-2 mt-4 first:mt-0 pb-2 border-b border-growth/20;
   font-family: 'Montserrat', sans-serif;
   letter-spacing: 0.01em;
 }
 
 .pdf-subsection-header {
-  @apply text-base font-semibold text-legacy mb-3 mt-4;
+  @apply text-base font-semibold text-legacy mb-2 mt-3;
   font-family: 'Montserrat', sans-serif;
 }
 
 .pdf-metadata-line {
-  @apply flex items-baseline gap-2 mb-2 text-sm;
+  @apply flex items-baseline gap-2 mb-1.5 text-sm;
 }
 
 .pdf-metadata-key {
@@ -294,13 +294,13 @@ p, span, div, body {
 }
 
 .pdf-paragraph {
-  @apply mb-4 text-sm leading-relaxed text-rush-black;
+  @apply mb-2 text-sm leading-normal text-rush-black;
   text-align: justify;
   hyphens: auto;
 }
 
 .pdf-list-item {
-  @apply flex items-start gap-3 mb-2 ml-4 text-sm text-rush-black;
+  @apply flex items-start gap-3 mb-1.5 ml-4 text-sm text-rush-black;
 }
 
 .pdf-bullet {
@@ -309,19 +309,19 @@ p, span, div, body {
 }
 
 .pdf-numbered-item {
-  @apply mb-2 ml-6 text-sm text-rush-black leading-relaxed;
+  @apply mb-1.5 ml-6 text-sm text-rush-black leading-normal;
 }
 
 .pdf-blockquote {
-  @apply pl-4 py-2 my-4 border-l-4 border-growth/30 bg-sage/5 text-sm italic text-rush-black/90;
+  @apply pl-4 py-2 my-3 border-l-4 border-growth/30 bg-sage/5 text-sm italic text-rush-black/90;
 }
 
 .pdf-separator {
-  @apply my-6 border-t border-rush-gray/20;
+  @apply my-4 border-t border-rush-gray/20;
 }
 
 .pdf-notice {
-  @apply px-4 py-3 my-4 bg-gold/10 border-l-4 border-gold rounded-r text-sm text-rush-black;
+  @apply px-4 py-3 my-3 bg-gold/10 border-l-4 border-gold rounded-r text-sm text-rush-black;
 }
 
 /* Print Styles for PDF Export */

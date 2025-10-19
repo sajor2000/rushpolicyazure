@@ -156,8 +156,9 @@ export default function Home() {
     let fullDocument = '';
 
     // Look for the ANSWER: and FULL_POLICY_DOCUMENT: markers
-    const answerMatch = content.match(/ANSWER:\s*([\s\S]*?)(?=FULL_POLICY_DOCUMENT:|$)/i);
-    const documentMatch = content.match(/FULL_POLICY_DOCUMENT:\s*([\s\S]*)/i);
+    // Stop answer extraction at PART 2 separator or FULL_POLICY_DOCUMENT marker
+    const answerMatch = content.match(/ANSWER:\s*([\s\S]*?)(?=━+\s*PART 2|FULL_POLICY_DOCUMENT:|$)/i);
+    const documentMatch = content.match(/FULL_POLICY_DOCUMENT:\s*([\s\S]*?)(?=━+\s*SOURCE CITATIONS|$)/i);
 
     if (answerMatch && answerMatch[1]) {
       // Clean up the answer (remove separator lines and extra whitespace)
@@ -194,12 +195,13 @@ export default function Home() {
   }, []);
 
   // Parse policy metadata header into structured object (Memoized with safety limit)
+  // Enhanced to handle Rush policy table-based layouts with multi-column format
   const parseMetadataHeader = useCallback((lines) => {
     // Safety limit to prevent performance issues with large documents
     const safeLines = lines.slice(0, PERFORMANCE.MAX_METADATA_LINES);
 
     const metadata = {
-      institution: 'RUSH UNIVERSITY SYSTEM FOR HEALTH',
+      institution: 'Rush University System for Health',
       policyTitle: '',
       policyNumber: '',
       referenceNumber: '',
@@ -213,39 +215,72 @@ export default function Home() {
       notice: 'Printed copies are for reference only. Please refer to the electronic copy for the latest version'
     };
 
-    safeLines.forEach(line => {
-      const trimmed = line.trim();
-      if (trimmed.includes('RUSH UNIVERSITY')) {
-        metadata.institution = trimmed;
-      } else if (trimmed.match(/^Policy Title:/i)) {
-        metadata.policyTitle = trimmed.replace(/^Policy Title:\s*/i, '').replace(/^\*\*\s*/, '').replace(/\*\*$/, '');
-      } else if (trimmed.match(/^Policy Number:/i)) {
-        metadata.policyNumber = trimmed.replace(/^Policy Number:\s*/i, '').replace(/^\*\*\s*/, '').replace(/\*\*$/, '');
-      } else if (trimmed.match(/^Reference Number:/i)) {
-        metadata.referenceNumber = trimmed.replace(/^Reference Number:\s*/i, '');
-      } else if (trimmed.match(/^Document Owner:/i)) {
-        metadata.documentOwner = trimmed.replace(/^Document Owner:\s*/i, '');
-      } else if (trimmed.match(/^Approver/i)) {
-        metadata.approver = trimmed.replace(/^Approver\(s\)?:\s*/i, '');
-      } else if (trimmed.match(/^Date Created:/i)) {
-        metadata.dateCreated = trimmed.replace(/^Date Created:\s*/i, '');
-      } else if (trimmed.match(/^Date Approved:/i)) {
-        metadata.dateApproved = trimmed.replace(/^Date Approved:\s*/i, '');
-      } else if (trimmed.match(/^Date Updated:/i)) {
-        metadata.dateUpdated = trimmed.replace(/^Date Updated:\s*/i, '');
-      } else if (trimmed.match(/^Review Due:/i)) {
-        metadata.reviewDue = trimmed.replace(/^Review Due:\s*/i, '');
-      } else if (trimmed.match(/^Applies To:/i)) {
-        metadata.appliesTo = trimmed.replace(/^Applies To:\s*/i, '');
-      } else if (trimmed.match(/Printed copies|for reference only/i)) {
-        metadata.notice = trimmed;
-      }
-    });
+    // Join lines into single text block for better multi-column table parsing
+    const headerText = safeLines.join('\n');
 
-    // Ensure all values are strings, never null
+    // Enhanced extraction patterns for table-based layout
+    // Patterns match: "Label: Value" where Value ends at pipe "|", newline, or another Label
+    const extractors = {
+      // Policy Title - capture until Policy Number or pipe or newline
+      policyTitle: /Policy Title:\s*([^\n|]+?)(?:\s*\||Policy Number:|\n|$)/i,
+
+      // Policy Number - capture until next field or line end
+      policyNumber: /Policy Number:\s*([^\n|]+?)(?:\s*\||\n|Document Owner:|$)/i,
+
+      // Reference Number (alternative to Policy Number in some documents)
+      referenceNumber: /Reference Number:\s*([^\n|]+?)(?:\s*\||\n|$)/i,
+
+      // Document Owner - capture until Approver or pipe or newline
+      documentOwner: /Document Owner:\s*([^\n|]+?)(?:\s*\||Approver|\n|$)/i,
+
+      // Approver - capture until next field or line end
+      approver: /Approver\(s\)?:\s*([^\n|]+?)(?:\s*\||\n|Date Created:|$)/i,
+
+      // Date fields - capture until next field or pipe or newline
+      dateCreated: /Date Created:\s*([^\n|]+?)(?:\s*\||Date Approved:|\n|$)/i,
+      dateApproved: /Date Approved:\s*([^\n|]+?)(?:\s*\||Date Updated:|\n|$)/i,
+      dateUpdated: /Date Updated:\s*([^\n|]+?)(?:\s*\||Review Due:|\n|$)/i,
+      reviewDue: /Review Due:\s*([^\n|]+?)(?:\s*\||\n|Applies To:|$)/i,
+
+      // Applies To - often contains checkboxes, capture entire line
+      appliesTo: /Applies To:\s*([^\n]+?)(?:\n|Printed copies|$)/i,
+
+      // Notice - the standard disclaimer
+      notice: /(Printed copies are for reference only[^\n]*)/i
+    };
+
+    // Apply extractors to header text
+    for (const [key, pattern] of Object.entries(extractors)) {
+      const match = headerText.match(pattern);
+      if (match && match[1]) {
+        let value = match[1].trim();
+
+        // Clean up the extracted value
+        value = value
+          .replace(/☒/g, '✓')          // Normalize checkboxes to checkmarks
+          .replace(/☐/g, '○')          // Empty checkboxes to circles
+          .replace(/\*\*/g, '')        // Remove markdown bold
+          .replace(/\s+/g, ' ')        // Normalize whitespace
+          .replace(/\|\s*$/,'')        // Remove trailing pipes
+          .trim();
+
+        metadata[key] = value;
+      }
+    }
+
+    // Post-processing: Handle special cases
+    // If policyNumber is empty but referenceNumber exists, use it
+    if (!metadata.policyNumber && metadata.referenceNumber) {
+      metadata.policyNumber = metadata.referenceNumber;
+    }
+
+    // Ensure all values are strings, use 'Not specified' for empty required fields
     Object.keys(metadata).forEach(key => {
-      if (metadata[key] === null || metadata[key] === undefined) {
-        metadata[key] = '';
+      if (!metadata[key] || metadata[key] === 'Not Set' || metadata[key] === '') {
+        // Keep institution and notice defaults, mark others as not specified
+        if (key !== 'institution' && key !== 'notice') {
+          metadata[key] = 'Not specified';
+        }
       }
     });
 
@@ -259,9 +294,20 @@ export default function Home() {
     let currentSection = null;
     let inMetadataHeader = false;
     let metadataLines = [];
+    let lastLineWasEmpty = false;
 
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
+
+      // Skip consecutive blank lines to reduce excessive whitespace
+      if (!trimmedLine) {
+        if (lastLineWasEmpty) {
+          return; // Skip consecutive blank line
+        }
+        lastLineWasEmpty = true;
+      } else {
+        lastLineWasEmpty = false;
+      }
 
       // Detect start of metadata header
       if (trimmedLine.includes('RUSH UNIVERSITY') && index < 5) {
@@ -354,9 +400,9 @@ export default function Home() {
         return; // Skip individual metadata line rendering
       }
 
-      // Skip empty lines but preserve spacing
+      // Skip empty lines but preserve minimal spacing (reduced from h-4 to h-2)
       if (!trimmedLine) {
-        formatted.push(<div key={generateKey('empty-line', index)} className="h-4"></div>);
+        formatted.push(<div key={generateKey('empty-line', index)} className="h-2"></div>);
         return;
       }
 
@@ -495,8 +541,9 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: sanitizedMessage,
-          resetConversation: messages.length === 0
+          message: sanitizedMessage
+          // Note: Backend always creates fresh thread (stateless architecture)
+          // No resetConversation flag needed - every request is fresh
         }),
         signal: abortControllerRef.current.signal
       });
@@ -699,7 +746,7 @@ export default function Home() {
 
                           return (
                             <>
-                              {/* Answer Section */}
+                              {/* Answer Section - PART 1 */}
                               {answer && (
                                 <div className="answer-section">
                                   <div className="answer-header">
@@ -733,7 +780,7 @@ export default function Home() {
                                 </div>
                               )}
 
-                              {/* Source Document Evidence Section */}
+                              {/* Source Document Evidence Section - PART 2 */}
                               <div className="evidence-section">
                                 <div className="evidence-header">
                                   <BookOpen className="w-5 h-5 text-legacy" />

@@ -19,7 +19,6 @@ export const PERFORMANCE = {
   MAX_METADATA_LINES: 50,            // Safety limit for metadata parsing
   TOAST_DURATION: 3000,              // Toast notification duration (ms)
   SESSION_EXPIRY: 60 * 60 * 24,      // Session cookie expiry (24 hours in seconds)
-  MAX_THREADS: 1000,                 // Maximum cached conversation threads
   SCROLL_THRESHOLD: 100,             // Pixels from bottom to trigger auto-scroll
   CHARACTER_WARNING_THRESHOLD: 1800  // Show warning when approaching limit
 };

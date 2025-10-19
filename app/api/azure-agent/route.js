@@ -11,60 +11,68 @@ const project = new AIProjectClient(
 
 const AGENT_ID = process.env.AZURE_AI_AGENT_ID || AZURE_CONFIG.DEFAULT_AGENT_ID;
 
-// Session-based thread storage with LRU cache (prevents memory leaks and cross-user contamination)
-const conversationThreads = new Map();
-
-// Helper function to clean up old threads (LRU eviction)
-function cleanupOldThreads() {
-  if (conversationThreads.size > PERFORMANCE.MAX_THREADS) {
-    const firstKey = conversationThreads.keys().next().value;
-    conversationThreads.delete(firstKey);
-    console.log(`Evicted old thread: ${firstKey}`);
-  }
-}
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATELESS ARCHITECTURE FOR RAG ACCURACY
+// ═══════════════════════════════════════════════════════════════════════════════
+// NO thread storage - every request creates a fresh thread
+// This ensures:
+//   1. Zero conversation history between questions
+//   2. Fresh RAG database search for every query
+//   3. No hallucinations from previous context
+//   4. Maximum retrieval accuracy
+// ═══════════════════════════════════════════════════════════════════════════════
 
 export async function POST(request) {
   console.log('Azure AI Agent API Route called:', new Date().toISOString());
 
   try {
     const body = await request.json();
-    const { message, resetConversation } = body;
+    const { message } = body;
 
     if (!message) {
       return NextResponse.json({ error: ERROR_MESSAGES.MESSAGE_REQUIRED }, { status: 400 });
     }
 
-    // Get session ID from cookie or generate new one
-    const cookies = request.headers.get('cookie') || '';
-    const sessionMatch = cookies.match(new RegExp(`${SESSION_CONFIG.COOKIE_NAME}=([^;]+)`));
-    const sessionId = sessionMatch ? sessionMatch[1] : `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    // CRITICAL FOR RAG ACCURACY: Always create a fresh thread for each question
+    // This ensures the Azure AI Agent performs a fresh search in the RAG database
+    // instead of relying on previous conversation context, which prevents:
+    // 1. Hallucinations from previous responses
+    // 2. Incorrect answers from conversation bleed-over
+    // 3. Stale information from earlier in the conversation
+    //
+    // DO NOT store threads in the map - we want ZERO conversation history
+    // Every question must trigger a fresh RAG database search
 
-    console.log('Session ID:', sessionId);
-
-    // Reset conversation if requested
-    if (resetConversation) {
-      conversationThreads.delete(sessionId);
-      console.log('Conversation reset for session:', sessionId);
-    }
-
-    // Get or create thread for this session
-    let conversationThread = conversationThreads.get(sessionId);
-
-    if (!conversationThread) {
-      console.log('Creating new conversation thread for session:', sessionId);
-      conversationThread = await project.agents.threads.create();
-      conversationThreads.set(sessionId, conversationThread);
-      cleanupOldThreads();
-      console.log('Thread created:', conversationThread.id);
-    } else {
-      console.log('Using existing thread:', conversationThread.id);
-    }
+    console.log('Creating new conversation thread for fresh RAG search (stateless mode)');
+    const conversationThread = await project.agents.threads.create();
+    console.log('Fresh thread created:', conversationThread.id);
 
     // Create message in the thread
     await project.agents.messages.create(
       conversationThread.id,
       "user",
       `User question: "${message}"
+
+⚠️ CRITICAL RAG REQUIREMENTS - ZERO HALLUCINATION POLICY ⚠️
+
+You are a factual policy retrieval system. You MUST:
+1. Search the RAG database for every question - NEVER rely on memory or previous context
+2. ONLY quote directly from retrieved PolicyTech documents - NEVER paraphrase, summarize, or infer
+3. DO NOT rephrase or rewrite policy text - extract verbatim quotes only
+4. If information is not in the RAG database, respond EXACTLY: "I cannot find this information in the Rush PolicyTech database. Please contact PolicyTech directly."
+5. NEVER make up policy numbers, dates, approvers, or any other details
+6. NEVER use information from previous questions in this conversation
+7. Extract text EXACTLY as written in the source documents - word-for-word, character-for-character
+8. ALWAYS include citation marks 【source†file.pdf】 for every factual statement
+9. If uncertain about any detail, state "This information is not specified in the PolicyTech document" rather than guessing
+
+FORBIDDEN PHRASES (these indicate hallucination):
+- "Based on my knowledge..."
+- "I believe..."
+- "Typically..."
+- "Usually..."
+- "Generally speaking..."
+- "In my experience..."
 
 IMPORTANT: Provide your response in TWO clearly separated parts:
 
@@ -73,7 +81,7 @@ PART 1 - SYNTHESIZED ANSWER
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ANSWER:
-[Provide a concise, clear 2-3 sentence direct answer to the user's question. This should be factual, specific, and immediately useful. Base this answer ONLY on the official PolicyTech document content.]
+[Provide a concise, clear 2-3 sentence direct answer USING ONLY EXACT QUOTES from the PolicyTech documents you retrieved. This should be factual, literal, and specific - answer exactly what was asked based ONLY on the official PolicyTech document content you just searched for. DO NOT paraphrase - copy text verbatim. DO NOT use ** markdown formatting. Use plain text with italic formatting only for policy titles. Include citation marks 【source†file.pdf】 for every statement. If the answer is not in the retrieved documents, state "I cannot find this information in the Rush PolicyTech database."]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PART 2 - SOURCE DOCUMENT EVIDENCE
@@ -213,20 +221,90 @@ This should look EXACTLY like the official Rush PolicyTech PDF document when dis
       console.log('Response length:', assistantResponse.length, 'characters');
 
       // Ensure the response is a valid string and doesn't break JSON
-      const cleanResponse = typeof assistantResponse === 'string'
+      let cleanResponse = typeof assistantResponse === 'string'
         ? assistantResponse
         : String(assistantResponse);
 
-      // Set session cookie for thread persistence
-      const response = NextResponse.json({ response: cleanResponse });
-      response.cookies.set(SESSION_CONFIG.COOKIE_NAME, sessionId, {
-        httpOnly: SESSION_CONFIG.HTTP_ONLY,
-        secure: SESSION_CONFIG.SECURE,
-        sameSite: SESSION_CONFIG.SAME_SITE,
-        maxAge: PERFORMANCE.SESSION_EXPIRY
-      });
+      // Post-processing: Clean formatting while preserving structure
 
-      return response;
+      // Step 1: Extract all citation marks before removing them
+      const citations = [];
+      const citationRegex = /【([^】]+)】/g;
+      let match;
+      while ((match = citationRegex.exec(cleanResponse)) !== null) {
+        citations.push(match[1]); // Store the citation content
+      }
+
+      // Step 2: Clean formatting ONLY (keep PART 1 and PART 2 structure)
+      cleanResponse = cleanResponse
+        // Remove citation marks from body (will add at bottom)
+        .replace(/【[^】]+】/g, '')
+        // Remove ** markdown bold markers
+        .replace(/\*\*/g, '')
+        // Clean up excessive whitespace
+        .replace(/\n\n\n+/g, '\n\n')                  // Reduce triple+ newlines to double
+        .replace(/(?<=\n)\s+(?=\n)/g, '')             // Remove whitespace-only lines
+        .replace(/\s+$/gm, '')                        // Remove trailing whitespace from each line
+        .trim();                                      // Remove leading/trailing whitespace
+
+      // Step 3: Add citations at the bottom if any were found
+      if (citations.length > 0) {
+        const uniqueCitations = [...new Set(citations)]; // Remove duplicates
+        cleanResponse += '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+        cleanResponse += 'SOURCE CITATIONS\n';
+        cleanResponse += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+        uniqueCitations.forEach((citation, index) => {
+          cleanResponse += `[${index + 1}] ${citation}\n`;
+        });
+      }
+
+      console.log('Cleaned response length:', cleanResponse.length, 'characters');
+      console.log('Citations extracted:', citations.length);
+
+      // ═══════════════════════════════════════════════════════════════════════════════
+      // RAG ACCURACY MONITORING
+      // ═══════════════════════════════════════════════════════════════════════════════
+      // Validate response quality to detect potential hallucinations
+
+      // 1. Citation count validation
+      if (citations.length === 0) {
+        console.warn('⚠️ RAG WARNING: No citations found in response - possible hallucination');
+      } else {
+        console.log('✅ RAG VALIDATION: Found', citations.length, 'citations');
+      }
+
+      // 2. Fresh thread confirmation
+      console.log('✅ RAG VALIDATION: Fresh thread created for this request (ID:', conversationThread.id, ')');
+
+      // 3. Response structure validation
+      const hasPart1 = cleanResponse.includes('SYNTHESIZED ANSWER') || cleanResponse.includes('ANSWER:');
+      const hasPart2 = cleanResponse.includes('FULL_POLICY_DOCUMENT') || cleanResponse.includes('RUSH UNIVERSITY SYSTEM FOR HEALTH');
+
+      if (!hasPart1 || !hasPart2) {
+        console.warn('⚠️ RAG WARNING: Response missing expected structure (Part 1:', hasPart1, ', Part 2:', hasPart2, ')');
+      } else {
+        console.log('✅ RAG VALIDATION: Response has correct two-part structure');
+      }
+
+      // 4. Suspicious phrase detection (common hallucination indicators)
+      const suspiciousPhrases = [
+        'based on my knowledge',
+        'i believe',
+        'in my experience',
+        'generally speaking',
+        'typically',
+        'usually'
+      ];
+
+      const lowerResponse = cleanResponse.toLowerCase();
+      const foundSuspicious = suspiciousPhrases.filter(phrase => lowerResponse.includes(phrase));
+
+      if (foundSuspicious.length > 0) {
+        console.warn('⚠️ RAG WARNING: Response contains suspicious phrases:', foundSuspicious);
+      }
+
+      // Return response (stateless - no session cookies needed)
+      return NextResponse.json({ response: cleanResponse });
     } else {
       console.error('No assistant response found');
       return NextResponse.json({ error: ERROR_MESSAGES.NO_RESPONSE_AGENT }, { status: 500 });
