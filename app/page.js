@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { Send, FileText, AlertCircle, Shield, Loader2, User, MessageSquare, Users, Copy, CheckCheck, Sparkles, Clock, AlertTriangle, Building2, BookOpen } from 'lucide-react';
+import { PERFORMANCE, ERROR_MESSAGES, SUCCESS_MESSAGES, API_ENDPOINTS } from './constants';
 
 /**
  * Rush Policy Assistant - Azure GPT-5 Chat Model
@@ -153,8 +154,7 @@ export default function Home() {
   // Parse policy metadata header into structured object (Memoized with safety limit)
   const parseMetadataHeader = useCallback((lines) => {
     // Safety limit to prevent performance issues with large documents
-    const MAX_METADATA_LINES = 50;
-    const safeLines = lines.slice(0, MAX_METADATA_LINES);
+    const safeLines = lines.slice(0, PERFORMANCE.MAX_METADATA_LINES);
 
     const metadata = {
       institution: 'RUSH UNIVERSITY SYSTEM FOR HEALTH',
@@ -406,10 +406,10 @@ export default function Home() {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedIndex(index);
-      showToast('Copied to clipboard!');
+      showToast(SUCCESS_MESSAGES.COPIED);
       setTimeout(() => setCopiedIndex(null), 2000);
     } catch (err) {
-      showToast('Failed to copy', 'error');
+      showToast(ERROR_MESSAGES.COPY_FAILED, 'error');
     }
   }, [showToast]);
 
@@ -421,17 +421,16 @@ export default function Home() {
     // Input validation
     if (!trimmedMessage || isLoading) return;
 
-    // Character limit validation (2000 chars max)
-    const MAX_MESSAGE_LENGTH = 2000;
-    if (trimmedMessage.length > MAX_MESSAGE_LENGTH) {
-      showToast(`Message too long. Maximum ${MAX_MESSAGE_LENGTH} characters allowed.`, 'error');
+    // Character limit validation
+    if (trimmedMessage.length > PERFORMANCE.MAX_MESSAGE_LENGTH) {
+      showToast(ERROR_MESSAGES.MESSAGE_TOO_LONG(PERFORMANCE.MAX_MESSAGE_LENGTH), 'error');
       return;
     }
 
     // Sanitize control characters that might break parsing
     const sanitizedMessage = trimmedMessage
       .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
-      .slice(0, MAX_MESSAGE_LENGTH);
+      .slice(0, PERFORMANCE.MAX_MESSAGE_LENGTH);
 
     setInputValue('');
 
@@ -448,7 +447,7 @@ export default function Home() {
     abortControllerRef.current = new AbortController();
 
     try {
-      const response = await fetch('/api/azure-agent', {
+      const response = await fetch(API_ENDPOINTS.AZURE_AGENT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -465,7 +464,7 @@ export default function Home() {
         data = await response.json();
       } catch (jsonError) {
         console.error('JSON parse error:', jsonError);
-        throw new Error('Invalid response from server. The policy data may contain formatting issues.');
+        throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
       }
 
       if (!response.ok) {
@@ -474,7 +473,7 @@ export default function Home() {
 
       // Add bot response
       setMessages(prev => [...prev, { type: 'bot', content: data.response, timestamp: new Date() }]);
-      showToast('Response received!');
+      showToast(SUCCESS_MESSAGES.RESPONSE_RECEIVED);
     } catch (error) {
       // Handle aborted requests silently
       if (error.name === 'AbortError') {
@@ -484,7 +483,7 @@ export default function Home() {
 
       console.error("Error sending message:", error);
       const messageText = typeof error === 'string' ? error : error?.message;
-      let errorMessage = messageText || 'I apologize, but I\'m having trouble connecting to the PolicyTech database. Please try again or contact IT support if the issue persists.';
+      let errorMessage = messageText || ERROR_MESSAGES.CONNECTION_FAILED;
 
       setMessages(prev => [...prev, {
         type: 'error',
@@ -501,12 +500,12 @@ export default function Home() {
     setInputValue('');
     setMessages([]);
     try {
-      await fetch('/api/azure-agent', {
+      await fetch(API_ENDPOINTS.AZURE_AGENT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: 'reset', resetConversation: true })
       });
-      showToast('Conversation cleared');
+      showToast(SUCCESS_MESSAGES.CONVERSATION_CLEARED);
     } catch (error) {
       console.log('Conversation reset requested');
     }
