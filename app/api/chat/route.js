@@ -14,8 +14,18 @@ if (process.env.AZURE_OPENAI_API_KEY && process.env.AZURE_OPENAI_ENDPOINT) {
   ASSISTANT_ID = process.env.ASSISTANT_ID;
 }
 
-// In-memory thread storage (in production, use Redis or database)
-let conversationThread = null;
+// Session-based thread storage with LRU cache (prevents memory leaks and cross-user contamination)
+const conversationThreads = new Map();
+const MAX_THREADS = 1000;
+
+// Helper function to clean up old threads (LRU eviction)
+function cleanupOldThreads() {
+  if (conversationThreads.size > MAX_THREADS) {
+    const firstKey = conversationThreads.keys().next().value;
+    conversationThreads.delete(firstKey);
+    console.log(`Evicted old thread: ${firstKey}`);
+  }
+}
 
 export async function POST(request) {
   console.log('API Route called:', new Date().toISOString());
@@ -38,15 +48,27 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
+    // Get session ID from cookie or generate new one
+    const cookies = request.headers.get('cookie') || '';
+    const sessionMatch = cookies.match(/sessionId=([^;]+)/);
+    const sessionId = sessionMatch ? sessionMatch[1] : `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+    console.log('Session ID:', sessionId);
+
     // Reset conversation if requested
     if (resetConversation) {
-      conversationThread = null;
+      conversationThreads.delete(sessionId);
+      console.log('Conversation reset for session:', sessionId);
     }
 
-    // Create new thread only if one doesn't exist
+    // Get or create thread for this session
+    let conversationThread = conversationThreads.get(sessionId);
+
     if (!conversationThread) {
-      console.log('Creating new conversation thread');
+      console.log('Creating new conversation thread for session:', sessionId);
       conversationThread = await client.beta.threads.create();
+      conversationThreads.set(sessionId, conversationThread);
+      cleanupOldThreads();
       console.log('Thread created:', conversationThread.id);
     } else {
       console.log('Using existing thread:', conversationThread.id);
@@ -168,9 +190,19 @@ IMPORTANT FORMATTING RULES:
       const assistantMessage = messages.data.find(m => m.role === 'assistant');
 
       if (assistantMessage && assistantMessage.content[0]) {
-        const response = assistantMessage.content[0].text.value;
-        console.log('Response length:', response.length, 'characters');
-        return NextResponse.json({ response });
+        const responseText = assistantMessage.content[0].text.value;
+        console.log('Response length:', responseText.length, 'characters');
+
+        // Set session cookie for thread persistence
+        const response = NextResponse.json({ response: responseText });
+        response.cookies.set('sessionId', sessionId, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 // 24 hours
+        });
+
+        return response;
       } else {
         console.error('No assistant message found');
         return NextResponse.json({ error: 'No response from assistant' }, { status: 500 });

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { Send, FileText, AlertCircle, Shield, Loader2, User, MessageSquare, Users, Copy, CheckCheck, Sparkles, Clock, AlertTriangle, Building2, BookOpen } from 'lucide-react';
 
@@ -48,6 +48,8 @@ export default function Home() {
   const [toast, setToast] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const abortControllerRef = useRef(null);
+  const toastTimeoutRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -75,13 +77,37 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handleKeyboard);
   }, []);
 
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
-  };
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Cancel any pending fetch requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      // Clear toast timeout
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
 
-  // Parse response and extract answer, document, and metadata
-  const parseResponse = (content) => {
+  const showToast = useCallback((message, type = 'success') => {
+    // Clear existing timeout to prevent race conditions
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+
+    setToast({ message, type });
+
+    // Set new timeout with ref tracking
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast(null);
+      toastTimeoutRef.current = null;
+    }, 3000);
+  }, []);
+
+  // Parse response and extract answer, document, and metadata (Memoized for performance)
+  const parseResponse = useCallback((content) => {
     // Split content into answer and full document sections
     let answer = '';
     let fullDocument = '';
@@ -122,10 +148,14 @@ export default function Home() {
         department: departmentMatch ? departmentMatch[1].trim() : null,
       }
     };
-  };
+  }, []);
 
-  // Parse policy metadata header into structured object
-  const parseMetadataHeader = (lines) => {
+  // Parse policy metadata header into structured object (Memoized with safety limit)
+  const parseMetadataHeader = useCallback((lines) => {
+    // Safety limit to prevent performance issues with large documents
+    const MAX_METADATA_LINES = 50;
+    const safeLines = lines.slice(0, MAX_METADATA_LINES);
+
     const metadata = {
       institution: 'RUSH UNIVERSITY SYSTEM FOR HEALTH',
       policyTitle: '',
@@ -141,7 +171,7 @@ export default function Home() {
       notice: 'Printed copies are for reference only. Please refer to the electronic copy for the latest version'
     };
 
-    lines.forEach(line => {
+    safeLines.forEach(line => {
       const trimmed = line.trim();
       if (trimmed.includes('RUSH UNIVERSITY')) {
         metadata.institution = trimmed;
@@ -178,10 +208,10 @@ export default function Home() {
     });
 
     return metadata;
-  };
+  }, []);
 
-  // PDF-style document formatting with professional typography
-  const formatDocumentContent = (content) => {
+  // PDF-style document formatting with professional typography (Memoized for performance)
+  const formatDocumentContent = useCallback((content) => {
     const lines = content.split('\n');
     const formatted = [];
     let currentSection = null;
@@ -370,9 +400,9 @@ export default function Home() {
     });
 
     return formatted;
-  };
+  }, [parseMetadataHeader]);
 
-  const copyToClipboard = async (text, index) => {
+  const copyToClipboard = useCallback(async (text, index) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedIndex(index);
@@ -381,18 +411,41 @@ export default function Home() {
     } catch (err) {
       showToast('Failed to copy', 'error');
     }
-  };
+  }, [showToast]);
 
   const sendMessage = async (e, promptText = null) => {
     if (e) e.preventDefault();
     const messageToSend = promptText || inputValue;
-    if (!messageToSend.trim() || isLoading) return;
+    const trimmedMessage = messageToSend.trim();
+
+    // Input validation
+    if (!trimmedMessage || isLoading) return;
+
+    // Character limit validation (2000 chars max)
+    const MAX_MESSAGE_LENGTH = 2000;
+    if (trimmedMessage.length > MAX_MESSAGE_LENGTH) {
+      showToast(`Message too long. Maximum ${MAX_MESSAGE_LENGTH} characters allowed.`, 'error');
+      return;
+    }
+
+    // Sanitize control characters that might break parsing
+    const sanitizedMessage = trimmedMessage
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
+      .slice(0, MAX_MESSAGE_LENGTH);
 
     setInputValue('');
 
     // Add user message with animation
-    setMessages(prev => [...prev, { type: 'user', content: messageToSend, timestamp: new Date() }]);
+    setMessages(prev => [...prev, { type: 'user', content: sanitizedMessage, timestamp: new Date() }]);
     setIsLoading(true);
+
+    // Cancel previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    abortControllerRef.current = new AbortController();
 
     try {
       const response = await fetch('/api/azure-agent', {
@@ -401,9 +454,10 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: messageToSend,
+          message: sanitizedMessage,
           resetConversation: messages.length === 0
         }),
+        signal: abortControllerRef.current.signal
       });
 
       let data;
@@ -422,10 +476,16 @@ export default function Home() {
       setMessages(prev => [...prev, { type: 'bot', content: data.response, timestamp: new Date() }]);
       showToast('Response received!');
     } catch (error) {
+      // Handle aborted requests silently
+      if (error.name === 'AbortError') {
+        console.log('Request was cancelled by user sending new message');
+        return;
+      }
+
       console.error("Error sending message:", error);
       const messageText = typeof error === 'string' ? error : error?.message;
       let errorMessage = messageText || 'I apologize, but I\'m having trouble connecting to the PolicyTech database. Please try again or contact IT support if the issue persists.';
-      
+
       setMessages(prev => [...prev, {
         type: 'error',
         content: errorMessage,

@@ -10,8 +10,18 @@ const project = new AIProjectClient(
 
 const AGENT_ID = process.env.AZURE_AI_AGENT_ID || "asst_301EhwakRXWsOCgGQt276WiU";
 
-// In-memory thread storage (in production, use Redis or database)
-let conversationThread = null;
+// Session-based thread storage with LRU cache (prevents memory leaks and cross-user contamination)
+const conversationThreads = new Map();
+const MAX_THREADS = 1000;
+
+// Helper function to clean up old threads (LRU eviction)
+function cleanupOldThreads() {
+  if (conversationThreads.size > MAX_THREADS) {
+    const firstKey = conversationThreads.keys().next().value;
+    conversationThreads.delete(firstKey);
+    console.log(`Evicted old thread: ${firstKey}`);
+  }
+}
 
 export async function POST(request) {
   console.log('Azure AI Agent API Route called:', new Date().toISOString());
@@ -24,15 +34,27 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
+    // Get session ID from cookie or generate new one
+    const cookies = request.headers.get('cookie') || '';
+    const sessionMatch = cookies.match(/sessionId=([^;]+)/);
+    const sessionId = sessionMatch ? sessionMatch[1] : `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+    console.log('Session ID:', sessionId);
+
     // Reset conversation if requested
     if (resetConversation) {
-      conversationThread = null;
+      conversationThreads.delete(sessionId);
+      console.log('Conversation reset for session:', sessionId);
     }
 
-    // Create new thread only if one doesn't exist
+    // Get or create thread for this session
+    let conversationThread = conversationThreads.get(sessionId);
+
     if (!conversationThread) {
-      console.log('Creating new conversation thread');
+      console.log('Creating new conversation thread for session:', sessionId);
       conversationThread = await project.agents.threads.create();
+      conversationThreads.set(sessionId, conversationThread);
+      cleanupOldThreads();
       console.log('Thread created:', conversationThread.id);
     } else {
       console.log('Using existing thread:', conversationThread.id);
@@ -195,7 +217,16 @@ This should look EXACTLY like the official Rush PolicyTech PDF document when dis
         ? assistantResponse
         : String(assistantResponse);
 
-      return NextResponse.json({ response: cleanResponse });
+      // Set session cookie for thread persistence
+      const response = NextResponse.json({ response: cleanResponse });
+      response.cookies.set('sessionId', sessionId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 // 24 hours
+      });
+
+      return response;
     } else {
       console.error('No assistant response found');
       return NextResponse.json({ error: 'No response from agent' }, { status: 500 });
