@@ -137,6 +137,102 @@ p, span, div, body {
   font-family: 'Montserrat', sans-serif;
 }
 
+/* Policy Metadata Box - PDF Table Format */
+.policy-metadata-box {
+  @apply border-2 border-rush-black rounded-md mb-6 bg-white overflow-hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.metadata-header-row {
+  @apply p-3 border-b-2 border-rush-black bg-white;
+}
+
+.metadata-logo {
+  @apply h-10 object-contain;
+}
+
+.metadata-table {
+  @apply w-full bg-white;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+}
+
+.metadata-table tr {
+  @apply border-b border-rush-black;
+}
+
+.metadata-table tr:last-child {
+  @apply border-b-0;
+}
+
+.metadata-cell {
+  @apply p-3 border-r border-rush-black align-top;
+  vertical-align: top;
+}
+
+.metadata-cell-wide {
+  width: 60%;
+}
+
+.metadata-cell-date {
+  @apply p-2 border-r border-rush-black align-top;
+  width: 25%;
+  font-size: 11px;
+}
+
+.metadata-cell-last {
+  @apply border-r-0;
+}
+
+.metadata-cell:last-child {
+  @apply border-r-0;
+}
+
+.metadata-label {
+  @apply font-bold text-rush-black mb-1;
+  font-size: 11px;
+  display: block;
+}
+
+.metadata-value {
+  @apply text-rush-black;
+  font-size: 11px;
+  display: block;
+  min-height: 1.2em;
+  word-wrap: break-word;
+}
+
+.metadata-applies-to {
+  @apply p-3 text-xs bg-white border-b-0;
+  font-family: Arial, sans-serif;
+}
+
+.metadata-notice {
+  @apply text-xs italic text-center p-3 bg-white border-t border-rush-black;
+  color: #cc0000;
+  font-family: Arial, sans-serif;
+}
+
+/* Ensure blank fields show space */
+.metadata-value:empty::after {
+  content: '\00a0';
+}
+
+@media (max-width: 768px) {
+  .metadata-cell-date {
+    font-size: 10px;
+    padding: 8px;
+  }
+
+  .metadata-label {
+    font-size: 10px;
+  }
+
+  .metadata-value {
+    font-size: 10px;
+  }
+}
+
 /* PDF-Style Document Components */
 .pdf-document-container {
   @apply bg-white shadow-lg border border-rush-gray/20 rounded-lg overflow-hidden;

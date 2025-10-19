@@ -79,6 +79,22 @@ Review Due: [MM/DD/YYYY]
 Applies To: RUMC ☒ RUMG ☐ ROPH ☐ RCMC ☐ RCH ☐ ROPPG ☐ RCMG ☐
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+CRITICAL METADATA REQUIREMENTS:
+You MUST include ALL of the following metadata fields in the header section above, even if some values are unknown:
+- Policy Title (REQUIRED - never omit, this is the document title)
+- Policy Number (REQUIRED - use "Not specified" if unknown)
+- Reference Number (use "Not specified" if unknown)
+- Document Owner (use "Not specified" if unknown)
+- Approver(s) (REQUIRED - use "Not specified" if unknown)
+- Date Created (use "Not specified" if unknown)
+- Date Approved (use "Not specified" if unknown)
+- Date Updated (use "Not specified" if unknown)
+- Review Due (use "Not specified" if unknown)
+- Applies To (REQUIRED - list all Rush facilities with checkboxes: RUMC, RUMG, ROPH, RCMC, RCH, ROPPG, RCMG)
+
+If any field is not available in the PolicyTech document, write "Not specified" - NEVER omit the field label and value entirely.
+The metadata table MUST always be complete with all fields present.
+
 NOTE: These policies contain official Rush University Medical Center guidance and procedures.
 The "Applies To" section indicates which Rush facilities this policy covers:
 - RUMC = Rush University Medical Center

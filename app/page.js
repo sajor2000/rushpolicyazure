@@ -124,14 +124,163 @@ export default function Home() {
     };
   };
 
+  // Parse policy metadata header into structured object
+  const parseMetadataHeader = (lines) => {
+    const metadata = {
+      institution: 'RUSH UNIVERSITY SYSTEM FOR HEALTH',
+      policyTitle: '',
+      policyNumber: '',
+      referenceNumber: '',
+      documentOwner: '',
+      approver: '',
+      dateCreated: '',
+      dateApproved: '',
+      dateUpdated: '',
+      reviewDue: '',
+      appliesTo: '',
+      notice: 'Printed copies are for reference only. Please refer to the electronic copy for the latest version'
+    };
+
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed.includes('RUSH UNIVERSITY')) {
+        metadata.institution = trimmed;
+      } else if (trimmed.match(/^Policy Title:/i)) {
+        metadata.policyTitle = trimmed.replace(/^Policy Title:\s*/i, '').replace(/^\*\*\s*/, '').replace(/\*\*$/, '');
+      } else if (trimmed.match(/^Policy Number:/i)) {
+        metadata.policyNumber = trimmed.replace(/^Policy Number:\s*/i, '').replace(/^\*\*\s*/, '').replace(/\*\*$/, '');
+      } else if (trimmed.match(/^Reference Number:/i)) {
+        metadata.referenceNumber = trimmed.replace(/^Reference Number:\s*/i, '');
+      } else if (trimmed.match(/^Document Owner:/i)) {
+        metadata.documentOwner = trimmed.replace(/^Document Owner:\s*/i, '');
+      } else if (trimmed.match(/^Approver/i)) {
+        metadata.approver = trimmed.replace(/^Approver\(s\)?:\s*/i, '');
+      } else if (trimmed.match(/^Date Created:/i)) {
+        metadata.dateCreated = trimmed.replace(/^Date Created:\s*/i, '');
+      } else if (trimmed.match(/^Date Approved:/i)) {
+        metadata.dateApproved = trimmed.replace(/^Date Approved:\s*/i, '');
+      } else if (trimmed.match(/^Date Updated:/i)) {
+        metadata.dateUpdated = trimmed.replace(/^Date Updated:\s*/i, '');
+      } else if (trimmed.match(/^Review Due:/i)) {
+        metadata.reviewDue = trimmed.replace(/^Review Due:\s*/i, '');
+      } else if (trimmed.match(/^Applies To:/i)) {
+        metadata.appliesTo = trimmed.replace(/^Applies To:\s*/i, '');
+      } else if (trimmed.match(/Printed copies|for reference only/i)) {
+        metadata.notice = trimmed;
+      }
+    });
+
+    // Ensure all values are strings, never null
+    Object.keys(metadata).forEach(key => {
+      if (metadata[key] === null || metadata[key] === undefined) {
+        metadata[key] = '';
+      }
+    });
+
+    return metadata;
+  };
+
   // PDF-style document formatting with professional typography
   const formatDocumentContent = (content) => {
     const lines = content.split('\n');
     const formatted = [];
     let currentSection = null;
+    let inMetadataHeader = false;
+    let metadataLines = [];
 
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
+
+      // Detect start of metadata header
+      if (trimmedLine.includes('RUSH UNIVERSITY') && index < 5) {
+        inMetadataHeader = true;
+        metadataLines = [];
+      }
+
+      // Collect metadata lines
+      if (inMetadataHeader) {
+        metadataLines.push(line);
+
+        // End of metadata header (separator line or section start)
+        if (trimmedLine.match(/^━+$/) || trimmedLine.match(/^[IVX]+\.\s/) ||
+            (trimmedLine.match(/^NOTE:/i) && metadataLines.length > 5)) {
+          inMetadataHeader = false;
+
+          // Parse and render metadata box - PDF Table Format
+          const metadata = parseMetadataHeader(metadataLines);
+          formatted.push(
+            <div key="metadata-box" className="policy-metadata-box">
+              {/* Rush Logo Header */}
+              <div className="metadata-header-row">
+                <img src="/images/rush-logo.jpg" alt="Rush University System for Health" className="metadata-logo" />
+              </div>
+
+              {/* Metadata Table */}
+              <table className="metadata-table">
+                <tbody>
+                  {/* Row 1: Policy Title and Policy Number */}
+                  <tr>
+                    <td className="metadata-cell metadata-cell-wide">
+                      <div className="metadata-label">Policy Title:</div>
+                      <div className="metadata-value">{metadata.policyTitle || '\u00A0'}</div>
+                    </td>
+                    <td className="metadata-cell">
+                      <div className="metadata-label">Policy Number:</div>
+                      <div className="metadata-value">{metadata.policyNumber || '\u00A0'}</div>
+                    </td>
+                  </tr>
+
+                  {/* Row 2: Document Owner and Approver */}
+                  <tr>
+                    <td className="metadata-cell">
+                      <div className="metadata-label">Document Owner:</div>
+                      <div className="metadata-value">{metadata.documentOwner || '\u00A0'}</div>
+                    </td>
+                    <td className="metadata-cell">
+                      <div className="metadata-label">Approver(s):</div>
+                      <div className="metadata-value">{metadata.approver || '\u00A0'}</div>
+                    </td>
+                  </tr>
+
+                  {/* Row 3: Dates */}
+                  <tr>
+                    <td className="metadata-cell-date">
+                      <div className="metadata-label">Date Created:</div>
+                      <div className="metadata-value">{metadata.dateCreated || 'Not Set'}</div>
+                    </td>
+                    <td className="metadata-cell-date">
+                      <div className="metadata-label">Date Approved:</div>
+                      <div className="metadata-value">{metadata.dateApproved || '\u00A0'}</div>
+                    </td>
+                    <td className="metadata-cell-date">
+                      <div className="metadata-label">Date Updated:</div>
+                      <div className="metadata-value">{metadata.dateUpdated || '\u00A0'}</div>
+                    </td>
+                    <td className="metadata-cell-date metadata-cell-last">
+                      <div className="metadata-label">Review Due:</div>
+                      <div className="metadata-value">{metadata.reviewDue || '\u00A0'}</div>
+                    </td>
+                  </tr>
+
+                  {/* Row 4: Applies To */}
+                  <tr>
+                    <td colSpan="4" className="metadata-applies-to">
+                      <span className="font-semibold">Applies To:</span> {metadata.appliesTo || 'Not specified'}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Warning Notice */}
+              <div className="metadata-notice">{metadata.notice}</div>
+            </div>
+          );
+
+          metadataLines = [];
+          return;
+        }
+        return; // Skip individual metadata line rendering
+      }
 
       // Skip empty lines but preserve spacing
       if (!trimmedLine) {
@@ -328,27 +477,30 @@ export default function Home() {
         </div>
       )}
 
-      {/* Simple Header */}
+      {/* Enhanced Header */}
       <header className="bg-white border-b border-rush-gray/20 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-6xl mx-auto px-6 py-6">
+        <div className="max-w-6xl mx-auto px-6 py-6 md:py-8">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="relative w-[110px] h-9">
+            <div className="flex items-center space-x-3 md:space-x-5">
+              <div className="relative w-[130px] h-10 md:w-[150px] md:h-12">
                 <Image
                   src="/images/rush-logo.jpg"
                   alt="Rush University System for Health"
                   fill
-                  sizes="110px"
+                  sizes="(max-width: 768px) 130px, 150px"
                   priority
                   className="object-contain"
                 />
               </div>
-              <div className="h-8 w-px bg-rush-gray/30"></div>
-              <h1 className="text-xl font-semibold text-legacy">Policy Chat</h1>
+              <div className="h-10 md:h-12 w-px bg-gradient-to-b from-transparent via-rush-gray/40 to-transparent"></div>
+              <div className="flex flex-col">
+                <h1 className="text-2xl md:text-3xl font-bold text-legacy tracking-tight">Policy Chat</h1>
+                <p className="hidden md:block text-sm text-rush-gray mt-0.5">Official PolicyTech Assistant</p>
+              </div>
             </div>
             <div className="flex items-center space-x-2 px-3 py-1.5 bg-sage/30 rounded-full border border-growth/20">
               <div className="w-2 h-2 bg-growth rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-legacy">Ready</span>
+              <span className="text-xs md:text-sm font-medium text-legacy">Ready</span>
             </div>
           </div>
         </div>

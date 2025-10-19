@@ -70,7 +70,76 @@ PART 2 - SOURCE DOCUMENT EVIDENCE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 FULL_POLICY_DOCUMENT:
-[Provide the complete, exact policy document text as it appears in PolicyTech. Include all original formatting, section numbers, headers, effective dates, policy numbers, and exact language. This should be a verbatim copy of the original document.]`
+[Complete Rush PolicyTech document in its native format. Format the response EXACTLY as it appears in the official PolicyTech PDF document, including:
+
+REQUIRED DOCUMENT STRUCTURE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RUSH UNIVERSITY SYSTEM FOR HEALTH
+
+Policy Title: [Exact Policy Title from PolicyTech]
+Policy Number: [e.g., OP-0517]
+Reference Number: [e.g., 369]
+
+Document Owner: [Name]
+Approver(s): [Name]
+
+Date Created: [MM/DD/YYYY]
+Date Approved: [MM/DD/YYYY]
+Date Updated: [MM/DD/YYYY]
+Review Due: [MM/DD/YYYY]
+
+Applies To: RUMC ☒ RUMG ☐ ROPH ☐ RCMC ☐ RCH ☐ ROPPG ☐ RCMG ☐
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CRITICAL METADATA REQUIREMENTS:
+You MUST include ALL of the following metadata fields in the header section above, even if some values are unknown:
+- Policy Title (REQUIRED - never omit, this is the document title)
+- Policy Number (REQUIRED - use "Not specified" if unknown)
+- Reference Number (use "Not specified" if unknown)
+- Document Owner (use "Not specified" if unknown)
+- Approver(s) (REQUIRED - use "Not specified" if unknown)
+- Date Created (use "Not specified" if unknown)
+- Date Approved (use "Not specified" if unknown)
+- Date Updated (use "Not specified" if unknown)
+- Review Due (use "Not specified" if unknown)
+- Applies To (REQUIRED - list all Rush facilities with checkboxes: RUMC, RUMG, ROPH, RCMC, RCH, ROPPG, RCMG)
+
+If any field is not available in the PolicyTech document, write "Not specified" - NEVER omit the field label and value entirely.
+The metadata table MUST always be complete with all fields present.
+
+NOTE: These policies contain official Rush University Medical Center guidance and procedures.
+The "Applies To" section indicates which Rush facilities this policy covers:
+- RUMC = Rush University Medical Center
+- RUMG = Rush University Medical Group
+- ROPH = Rush Oak Park Hospital
+- RCMC = Rush Copley Medical Center
+- RCH = Rush Children's Hospital
+- ROPPG = Rush Oak Park Physicians Group
+- RCMG = Rush Copley Medical Group
+
+I. Policy
+[Numbered policy statements exactly as they appear in PolicyTech]
+
+II. Definitions
+[All definitions exactly as listed in PolicyTech]
+
+III. Procedure
+[Complete procedure section with equipment lists and step-by-step instructions]
+
+IV. Attachments
+[List all appendices and attachments]
+
+V. Related Policies or Clinical Resources
+[List all related policies with hyperlinks]
+
+VI. References and Regulatory References
+[All references and citations]
+
+IMPORTANT FORMATTING RULES:
+1. Use the EXACT section numbering from the original PolicyTech document
+2. Include ALL metadata (dates, approver, document owner, etc.)
+3. Keep the formal "Applies To" checkboxes
+4. Include the complete document - do not summarize or truncate]`
     });
 
     const run = await client.beta.threads.runs.create(conversationThread.id, {
