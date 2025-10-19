@@ -4,6 +4,15 @@ import Image from 'next/image';
 import { Send, FileText, AlertCircle, Shield, Loader2, User, MessageSquare, Users, Copy, CheckCheck, Sparkles, Clock, AlertTriangle, Building2, BookOpen } from 'lucide-react';
 import { PERFORMANCE, ERROR_MESSAGES, SUCCESS_MESSAGES, API_ENDPOINTS } from './constants';
 
+// Content-based key generation for stable React keys
+function generateKey(content, index) {
+  // Simple hash function for content-based keys
+  const hash = String(content).split('').reduce((acc, char) => {
+    return ((acc << 5) - acc) + char.charCodeAt(0);
+  }, 0);
+  return `${Math.abs(hash)}-${index}`;
+}
+
 /**
  * Rush Policy Assistant - Azure GPT-5 Chat Model
  *
@@ -41,6 +50,26 @@ const SUGGESTED_PROMPTS = [
   { icon: Clock, text: "How does PTO accrual work?", category: "Time & Benefits" },
 ];
 
+// Memoized suggested prompts component to prevent unnecessary re-renders
+const SuggestedPromptsGrid = React.memo(({ onPromptClick }) => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    {SUGGESTED_PROMPTS.map((prompt, index) => (
+      <button
+        key={generateKey(prompt.text, index)}
+        onClick={() => onPromptClick(prompt.text)}
+        className="p-4 bg-white border border-rush-gray/30 rounded-lg hover:border-growth hover:bg-sage/10 transition-all text-left"
+      >
+        <div className="flex items-center space-x-3">
+          <prompt.icon className="w-5 h-5 text-growth flex-shrink-0" />
+          <span className="text-sm text-rush-black">{prompt.text}</span>
+        </div>
+      </button>
+    ))}
+  </div>
+));
+
+SuggestedPromptsGrid.displayName = 'SuggestedPromptsGrid';
+
 export default function Home() {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -48,12 +77,25 @@ export default function Home() {
   const [copiedIndex, setCopiedIndex] = useState(null);
   const [toast, setToast] = useState(null);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   const abortControllerRef = useRef(null);
   const toastTimeoutRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Only auto-scroll if user is near bottom (within SCROLL_THRESHOLD pixels)
+    const container = messagesContainerRef.current;
+    if (container) {
+      const isNearBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight < PERFORMANCE.SCROLL_THRESHOLD;
+
+      if (isNearBottom) {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      // Fallback if container ref not available
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   useEffect(() => {
@@ -314,7 +356,7 @@ export default function Home() {
 
       // Skip empty lines but preserve spacing
       if (!trimmedLine) {
-        formatted.push(<div key={`space-${index}`} className="h-4"></div>);
+        formatted.push(<div key={generateKey('empty-line', index)} className="h-4"></div>);
         return;
       }
 
@@ -322,7 +364,7 @@ export default function Home() {
       if (trimmedLine.startsWith('###') || trimmedLine.match(/^(POLICY|SECTION|PROCEDURE|DEFINITIONS?|REFERENCES?|SCOPE|PURPOSE)/i)) {
         const headerText = trimmedLine.replace(/^###\s*/, '').replace(/^📋\s*/, '');
         formatted.push(
-          <h2 key={index} className="pdf-section-header">
+          <h2 key={generateKey(headerText, index)} className="pdf-section-header">
             {headerText}
           </h2>
         );
@@ -331,7 +373,7 @@ export default function Home() {
       else if (trimmedLine.startsWith('**') || trimmedLine.match(/^[IVX]+\.\s/) || trimmedLine.match(/^\d+\.\s[A-Z]/)) {
         const headerText = trimmedLine.replace(/^\*\*/, '').replace(/\*\*$/, '');
         formatted.push(
-          <h3 key={index} className="pdf-subsection-header">
+          <h3 key={generateKey(headerText, index)} className="pdf-subsection-header">
             {headerText}
           </h3>
         );
@@ -341,7 +383,7 @@ export default function Home() {
         const [key, ...valueParts] = trimmedLine.split(':');
         const value = valueParts.join(':').trim();
         formatted.push(
-          <div key={index} className="pdf-metadata-line">
+          <div key={generateKey(trimmedLine, index)} className="pdf-metadata-line">
             <span className="pdf-metadata-key">{key}:</span>
             <span className="pdf-metadata-value">{value}</span>
           </div>
@@ -352,7 +394,7 @@ export default function Home() {
         const text = trimmedLine.replace(/^[•\-\*☒☐]\s*/, '');
         const isChecked = trimmedLine.startsWith('☒');
         formatted.push(
-          <div key={index} className="pdf-list-item">
+          <div key={generateKey(text, index)} className="pdf-list-item">
             <span className="pdf-bullet">{isChecked ? '☑' : '•'}</span>
             <span>{text}</span>
           </div>
@@ -361,7 +403,7 @@ export default function Home() {
       // Numbered list items (a., i., 1., etc.)
       else if (trimmedLine.match(/^[a-z]\.\s/) || trimmedLine.match(/^[ivx]+\.\s/) || trimmedLine.match(/^\d+\.\s/)) {
         formatted.push(
-          <div key={index} className="pdf-numbered-item">
+          <div key={generateKey(trimmedLine, index)} className="pdf-numbered-item">
             {trimmedLine}
           </div>
         );
@@ -370,7 +412,7 @@ export default function Home() {
       else if (trimmedLine.startsWith('>')) {
         const text = trimmedLine.replace(/^>\s*/, '');
         formatted.push(
-          <blockquote key={index} className="pdf-blockquote">
+          <blockquote key={generateKey(text, index)} className="pdf-blockquote">
             {text}
           </blockquote>
         );
@@ -378,13 +420,13 @@ export default function Home() {
       // Separator lines (---, ===)
       else if (trimmedLine.match(/^[-=]{3,}$/)) {
         formatted.push(
-          <hr key={index} className="pdf-separator" />
+          <hr key={generateKey('separator', index)} className="pdf-separator" />
         );
       }
       // Warning/Note indicators
       else if (trimmedLine.match(/^⚠️|^💡|^ℹ️|^NOTE:|^WARNING:/i)) {
         formatted.push(
-          <div key={index} className="pdf-notice">
+          <div key={generateKey(trimmedLine, index)} className="pdf-notice">
             {trimmedLine}
           </div>
         );
@@ -392,7 +434,7 @@ export default function Home() {
       // Regular paragraph text
       else {
         formatted.push(
-          <p key={index} className="pdf-paragraph">
+          <p key={generateKey(trimmedLine, index)} className="pdf-paragraph">
             {trimmedLine}
           </p>
         );
@@ -496,6 +538,11 @@ export default function Home() {
     }
   };
 
+  // Memoized callback for suggested prompts to prevent unnecessary re-renders
+  const handlePromptClick = useCallback((promptText) => {
+    sendMessage(null, promptText);
+  }, []);
+
   const handleClear = async () => {
     setInputValue('');
     setMessages([]);
@@ -583,7 +630,14 @@ export default function Home() {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div
+            ref={messagesContainerRef}
+            className="flex-1 overflow-y-auto p-6 space-y-6"
+            role="log"
+            aria-label="Chat conversation history"
+            aria-live="polite"
+            aria-atomic="false"
+          >
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full">
                 <div className="text-center max-w-2xl">
@@ -595,28 +649,17 @@ export default function Home() {
                   </p>
 
                   {/* Suggested Prompts */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {SUGGESTED_PROMPTS.map((prompt, index) => (
-                      <button
-                        key={index}
-                        onClick={() => sendMessage(null, prompt.text)}
-                        className="p-4 bg-white border border-rush-gray/30 rounded-lg hover:border-growth hover:bg-sage/10 transition-all text-left"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <prompt.icon className="w-5 h-5 text-growth flex-shrink-0" />
-                          <span className="text-sm text-rush-black">{prompt.text}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                  <SuggestedPromptsGrid onPromptClick={handlePromptClick} />
                 </div>
               </div>
             ) : (
               messages.map((message, index) => (
                 <div
-                  key={index}
+                  key={generateKey(message.content.substring(0, 50), index)}
                   className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`}
                   style={{ animationDelay: `${index * 50}ms` }}
+                  role="article"
+                  aria-label={`${message.type === 'user' ? 'Your question' : 'Assistant response'} ${index + 1}`}
                 >
                   {message.type === 'user' ? (
                     <div className="flex items-start space-x-3 justify-end max-w-2xl">
@@ -670,8 +713,9 @@ export default function Home() {
                                     <button
                                       onClick={() => copyToClipboard(answer, `answer-${index}`)}
                                       className="answer-copy-button-inline"
-                                      title="Copy answer"
-                                      aria-label="Copy answer to clipboard"
+                                      disabled={copiedIndex === `answer-${index}`}
+                                      aria-label={copiedIndex === `answer-${index}` ? 'Answer copied to clipboard' : 'Copy answer to clipboard'}
+                                      aria-live="polite"
                                     >
                                       {copiedIndex === `answer-${index}` ? (
                                         <>
@@ -711,8 +755,9 @@ export default function Home() {
                                       <button
                                         onClick={() => copyToClipboard(fullDocument, `doc-${index}`)}
                                         className="pdf-copy-button"
-                                        title="Copy full document"
-                                        aria-label="Copy full document to clipboard"
+                                        disabled={copiedIndex === `doc-${index}`}
+                                        aria-label={copiedIndex === `doc-${index}` ? 'Document copied to clipboard' : 'Copy full document to clipboard'}
+                                        aria-live="polite"
                                       >
                                         {copiedIndex === `doc-${index}` ? (
                                           <>
@@ -802,9 +847,14 @@ export default function Home() {
                   <div className="w-10 h-10 bg-gradient-to-br from-growth to-legacy rounded-xl flex items-center justify-center flex-shrink-0 shadow-md border border-vitality/40">
                     <FileText className="w-5 h-5 text-white" />
                   </div>
-                  <div className="bg-sage/40 px-6 py-4 rounded-2xl shadow-md border border-growth/30">
+                  <div
+                    className="bg-sage/40 px-6 py-4 rounded-2xl shadow-md border border-growth/30"
+                    role="status"
+                    aria-live="polite"
+                    aria-label="Loading response"
+                  >
                     <div className="flex items-center space-x-3">
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-2" aria-hidden="true">
                         <div className="w-2.5 h-2.5 bg-growth rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
                         <div className="w-2.5 h-2.5 bg-vitality rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                         <div className="w-2.5 h-2.5 bg-legacy rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
@@ -820,17 +870,19 @@ export default function Home() {
 
           {/* Chat Input */}
           <div className="border-t border-rush-gray/20 p-6 bg-white">
-            <form onSubmit={sendMessage} className="flex space-x-3">
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Ask a policy question..."
-                className="flex-1 border border-rush-gray/30 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-growth focus:border-growth transition-all bg-white text-rush-black placeholder-rush-gray/60"
-                disabled={isLoading}
-                aria-label="Ask a policy question"
-              />
+            <form onSubmit={sendMessage} className="space-y-2">
+              <div className="flex space-x-3">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Ask a policy question..."
+                  className="flex-1 border border-rush-gray/30 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-growth focus:border-growth transition-all bg-white text-rush-black placeholder-rush-gray/60"
+                  disabled={isLoading}
+                  aria-label="Ask a policy question"
+                  maxLength={PERFORMANCE.MAX_MESSAGE_LENGTH}
+                />
               <button
                 type="submit"
                 disabled={isLoading || !inputValue.trim()}
@@ -859,7 +911,25 @@ export default function Home() {
                   Clear
                 </button>
               )}
-            </form>
+            </div>
+
+            {/* Character Counter */}
+            {inputValue.length > 0 && (
+              <div className="flex justify-end px-1">
+                <span
+                  className={`text-xs transition-colors ${
+                    inputValue.length >= PERFORMANCE.CHARACTER_WARNING_THRESHOLD
+                      ? 'text-red-600 font-semibold'
+                      : 'text-rush-gray/60'
+                  }`}
+                  aria-live="polite"
+                  aria-label={`${inputValue.length} of ${PERFORMANCE.MAX_MESSAGE_LENGTH} characters`}
+                >
+                  {inputValue.length} / {PERFORMANCE.MAX_MESSAGE_LENGTH}
+                </span>
+              </div>
+            )}
+          </form>
           </div>
         </div>
       </div>

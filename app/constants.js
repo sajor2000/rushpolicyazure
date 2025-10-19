@@ -9,7 +9,6 @@
 // API Endpoints
 export const API_ENDPOINTS = {
   AZURE_AGENT: '/api/azure-agent',
-  CHAT: '/api/chat',
   RESET: '/api/reset',
   HEALTH: '/api/health'
 };
@@ -32,15 +31,13 @@ export const ERROR_MESSAGES = {
   MESSAGE_REQUIRED: 'Message is required',
   INVALID_RESPONSE: 'Invalid response from server. The policy data may contain formatting issues.',
   NO_RESPONSE_AGENT: 'No response from agent',
-  NO_RESPONSE_ASSISTANT: 'No response from assistant',
   NETWORK_ERROR: 'Network error. Please check your connection.',
   COPY_FAILED: 'Failed to copy',
   AZURE_CONNECTION_FAILED: 'Azure connection failed',
   AZURE_FIREWALL: 'Cannot reach Azure AI endpoint. This might be due to network restrictions.',
   AUTH_FAILED: 'Authentication failed',
   AGENT_RUN_FAILED: 'Agent run failed',
-  ASSISTANT_RUN_FAILED: 'Assistant run failed',
-  TIMEOUT: 'The assistant took too long to respond. Please try again.'
+  TIMEOUT: 'The agent took too long to respond. Please try again.'
 };
 
 // Success Messages

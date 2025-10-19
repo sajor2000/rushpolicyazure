@@ -1,96 +1,93 @@
 # Dependencies
-/node_modules
-/.pnp
+node_modules/
+.pnp/
 .pnp.js
 
 # Testing
-/coverage
+coverage/
 
-# Next.js
-/.next/
-/out/
+# Next.js Build Output
+.next/
+out/
+dist/
 
-# Production
-/build
+# Production Build
+build/
 
-# Misc
-.DS_Store
-*.pem
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# Local env files
+# Environment Variables
+.env
 .env*.local
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Vercel
-.vercel
-
-
-# Environment variables
-.env.local
-.env.production.local
-.env.development.local
-
-
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
 
-# Logs
-logs
+# Debug & Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+logs/
 *.log
 dev.log
 
-# Editor directories and files
-.idea
-.vscode
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor Directories
+.idea/
+.vscode/
 *.swp
 *.swo
 *~
+*.sublime-project
+*.sublime-workspace
 
-# OS files
-.DS_Store
-Thumbs.db
+# Certificates & Keys
+*.pem
+*.key
+*.cert
 
-# Test files
-test-*.js
-!test-assistant.example.js
+# Deployment Platforms
+.vercel
+.azure/
 
-# Build output
-.next/
-out/
-dist/
-
-# Replit-specific files
+# Replit (Optional - can remove if not using Replit)
 .replit
 replit.nix
 .upm/
 .cache/
 .config/
-/tmp/
-
-# Temporary assets and test files
-attached_assets/
-assets/docs/
-
-# Keep public images for the app
-!public/images/
-
-# Replit logs
+.breakpoints
 *.replit.log
 
-# AI assistant directories
+# AI Assistant Directories
 .vincent/
+.claude/settings.local.json
 
-# Temporary documentation files
+# Temporary & Test Files
+tmp/
+temp/
+attached_assets/
+assets/docs/
 *_COMPLETE.md
 *_READY.md
 *_SUMMARY.md
+
+# Test files (exclude examples)
+test-*.js
+!test-assistant.example.js
+!scripts/test-*.js
+
+# Keep Important Public Assets
+!public/images/

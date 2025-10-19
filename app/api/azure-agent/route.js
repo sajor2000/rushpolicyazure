@@ -1,22 +1,22 @@
 import { NextResponse } from 'next/server';
 import { AIProjectClient } from '@azure/ai-projects';
 import { DefaultAzureCredential } from '@azure/identity';
+import { AZURE_CONFIG, PERFORMANCE, ERROR_MESSAGES, SESSION_CONFIG } from '../../constants';
 
 // Initialize Azure AI Project client
 const project = new AIProjectClient(
-  process.env.AZURE_AI_ENDPOINT || "https://rua-nonprod-ai-innovation.services.ai.azure.com/api/projects/rua-nonprod-ai-innovation-project",
+  process.env.AZURE_AI_ENDPOINT || AZURE_CONFIG.DEFAULT_ENDPOINT,
   new DefaultAzureCredential()
 );
 
-const AGENT_ID = process.env.AZURE_AI_AGENT_ID || "asst_301EhwakRXWsOCgGQt276WiU";
+const AGENT_ID = process.env.AZURE_AI_AGENT_ID || AZURE_CONFIG.DEFAULT_AGENT_ID;
 
 // Session-based thread storage with LRU cache (prevents memory leaks and cross-user contamination)
 const conversationThreads = new Map();
-const MAX_THREADS = 1000;
 
 // Helper function to clean up old threads (LRU eviction)
 function cleanupOldThreads() {
-  if (conversationThreads.size > MAX_THREADS) {
+  if (conversationThreads.size > PERFORMANCE.MAX_THREADS) {
     const firstKey = conversationThreads.keys().next().value;
     conversationThreads.delete(firstKey);
     console.log(`Evicted old thread: ${firstKey}`);
@@ -31,12 +31,12 @@ export async function POST(request) {
     const { message, resetConversation } = body;
 
     if (!message) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+      return NextResponse.json({ error: ERROR_MESSAGES.MESSAGE_REQUIRED }, { status: 400 });
     }
 
     // Get session ID from cookie or generate new one
     const cookies = request.headers.get('cookie') || '';
-    const sessionMatch = cookies.match(/sessionId=([^;]+)/);
+    const sessionMatch = cookies.match(new RegExp(`${SESSION_CONFIG.COOKIE_NAME}=([^;]+)`));
     const sessionId = sessionMatch ? sessionMatch[1] : `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     console.log('Session ID:', sessionId);
@@ -219,17 +219,17 @@ This should look EXACTLY like the official Rush PolicyTech PDF document when dis
 
       // Set session cookie for thread persistence
       const response = NextResponse.json({ response: cleanResponse });
-      response.cookies.set('sessionId', sessionId, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 // 24 hours
+      response.cookies.set(SESSION_CONFIG.COOKIE_NAME, sessionId, {
+        httpOnly: SESSION_CONFIG.HTTP_ONLY,
+        secure: SESSION_CONFIG.SECURE,
+        sameSite: SESSION_CONFIG.SAME_SITE,
+        maxAge: PERFORMANCE.SESSION_EXPIRY
       });
 
       return response;
     } else {
       console.error('No assistant response found');
-      return NextResponse.json({ error: 'No response from agent' }, { status: 500 });
+      return NextResponse.json({ error: ERROR_MESSAGES.NO_RESPONSE_AGENT }, { status: 500 });
     }
 
   } catch (error) {
@@ -237,16 +237,16 @@ This should look EXACTLY like the official Rush PolicyTech PDF document when dis
 
     // Check for specific Azure connection errors
     if (error.message && error.message.includes('ENOTFOUND')) {
-      return NextResponse.json({ 
-        error: 'Azure connection failed',
-        details: 'Cannot reach Azure AI endpoint. This might be due to network restrictions.',
+      return NextResponse.json({
+        error: ERROR_MESSAGES.AZURE_CONNECTION_FAILED,
+        details: ERROR_MESSAGES.AZURE_FIREWALL,
         hint: 'Azure firewall may be blocking requests'
       }, { status: 500 });
     }
 
     if (error.status === 401) {
-      return NextResponse.json({ 
-        error: 'Authentication failed',
+      return NextResponse.json({
+        error: ERROR_MESSAGES.AUTH_FAILED,
         details: 'Azure AI credentials are invalid or expired',
         hint: 'Check your Azure credentials and endpoint configuration'
       }, { status: 500 });
