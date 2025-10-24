@@ -1,16 +1,23 @@
 'use client';
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { Send, FileText, AlertCircle, Shield, Loader2, User, MessageSquare, Users, Copy, CheckCheck, Sparkles, Clock, AlertTriangle, Building2, BookOpen } from 'lucide-react';
+import { FileText, Sparkles, Shield, Users, Clock, Send, Loader2 } from 'lucide-react';
 import { PERFORMANCE, ERROR_MESSAGES, SUCCESS_MESSAGES, API_ENDPOINTS } from './constants';
 
-// Content-based key generation for stable React keys
-function generateKey(content, index) {
-  // Simple hash function for content-based keys
-  const hash = String(content).split('').reduce((acc, char) => {
-    return ((acc << 5) - acc) + char.charCodeAt(0);
-  }, 0);
-  return `${Math.abs(hash)}-${index}`;
+// Components
+import Toast from './components/chat/Toast';
+import MessageItem from './components/chat/MessageItem';
+import ChatInput from './components/chat/ChatInput';
+
+// Custom Hooks
+import { useToast } from './hooks/useToast';
+import { useClipboard } from './hooks/useClipboard';
+import { useResponseParser } from './hooks/useResponseParser';
+
+// Timestamp-based key generation for stable, unique React keys
+function generateKey(message, index) {
+  const timestamp = message.timestamp?.getTime() || Date.now();
+  return `msg-${timestamp}-${index}`;
 }
 
 /**
@@ -55,7 +62,7 @@ const SuggestedPromptsGrid = React.memo(({ onPromptClick }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
     {SUGGESTED_PROMPTS.map((prompt, index) => (
       <button
-        key={generateKey(prompt.text, index)}
+        key={`prompt-${index}-${prompt.text.substring(0, 20)}`}
         onClick={() => onPromptClick(prompt.text)}
         className="p-4 bg-white border border-rush-gray/30 rounded-lg hover:border-growth hover:bg-sage/10 transition-all text-left"
       >
@@ -83,6 +90,10 @@ export default function Home() {
   const toastTimeoutRef = useRef(null);
 
   const scrollToBottom = () => {
+    // Check if user prefers reduced motion
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const scrollBehavior = prefersReducedMotion ? 'auto' : 'smooth';
+
     // Only auto-scroll if user is near bottom (within SCROLL_THRESHOLD pixels)
     const container = messagesContainerRef.current;
     if (container) {
@@ -90,11 +101,11 @@ export default function Home() {
         container.scrollHeight - container.scrollTop - container.clientHeight < PERFORMANCE.SCROLL_THRESHOLD;
 
       if (isNearBottom) {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        messagesEndRef.current?.scrollIntoView({ behavior: scrollBehavior });
       }
     } else {
       // Fallback if container ref not available
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      messagesEndRef.current?.scrollIntoView({ behavior: scrollBehavior });
     }
   };
 
@@ -158,7 +169,12 @@ export default function Home() {
     // Look for the ANSWER: and FULL_POLICY_DOCUMENT: markers
     // Stop answer extraction at PART 2 separator or FULL_POLICY_DOCUMENT marker
     const answerMatch = content.match(/ANSWER:\s*([\s\S]*?)(?=━+\s*PART 2|FULL_POLICY_DOCUMENT:|$)/i);
-    const documentMatch = content.match(/FULL_POLICY_DOCUMENT:\s*([\s\S]*?)(?=━+\s*SOURCE CITATIONS|$)/i);
+
+    // Try multiple patterns to extract the full document:
+    // 1. Look for FULL_POLICY_DOCUMENT: marker
+    // 2. Look for RUSH UNIVERSITY SYSTEM FOR HEALTH header (fallback)
+    const documentMatch = content.match(/FULL_POLICY_DOCUMENT:\s*([\s\S]*?)(?=━+\s*SOURCE CITATIONS|$)/i) ||
+                         content.match(/(?:PART 2.*?\n+)?(RUSH UNIVERSITY SYSTEM FOR HEALTH[\s\S]*?)(?=━+\s*SOURCE CITATIONS|$)/i);
 
     if (answerMatch && answerMatch[1]) {
       // Clean up the answer (remove separator lines and extra whitespace)
@@ -171,8 +187,11 @@ export default function Home() {
     if (documentMatch && documentMatch[1]) {
       fullDocument = documentMatch[1].trim();
     } else {
-      // Fallback: if no FULL_POLICY_DOCUMENT marker, use entire content as document
-      fullDocument = content;
+      // Only use fallback if we have BOTH no answer and no document match
+      // This prevents mixing both parts together
+      if (!answer) {
+        fullDocument = content;
+      }
     }
 
     // Extract key metadata from the full document section
@@ -402,7 +421,7 @@ export default function Home() {
 
       // Skip empty lines but preserve minimal spacing (reduced from h-4 to h-2)
       if (!trimmedLine) {
-        formatted.push(<div key={generateKey('empty-line', index)} className="h-2"></div>);
+        formatted.push(<div key={`empty-${index}`} className="h-2"></div>);
         return;
       }
 
@@ -410,7 +429,7 @@ export default function Home() {
       if (trimmedLine.startsWith('###') || trimmedLine.match(/^(POLICY|SECTION|PROCEDURE|DEFINITIONS?|REFERENCES?|SCOPE|PURPOSE)/i)) {
         const headerText = trimmedLine.replace(/^###\s*/, '').replace(/^📋\s*/, '');
         formatted.push(
-          <h2 key={generateKey(headerText, index)} className="pdf-section-header">
+          <h2 key={`header-${index}`} className="pdf-section-header">
             {headerText}
           </h2>
         );
@@ -419,7 +438,7 @@ export default function Home() {
       else if (trimmedLine.startsWith('**') || trimmedLine.match(/^[IVX]+\.\s/) || trimmedLine.match(/^\d+\.\s[A-Z]/)) {
         const headerText = trimmedLine.replace(/^\*\*/, '').replace(/\*\*$/, '');
         formatted.push(
-          <h3 key={generateKey(headerText, index)} className="pdf-subsection-header">
+          <h3 key={`subheader-${index}`} className="pdf-subsection-header">
             {headerText}
           </h3>
         );
@@ -429,7 +448,7 @@ export default function Home() {
         const [key, ...valueParts] = trimmedLine.split(':');
         const value = valueParts.join(':').trim();
         formatted.push(
-          <div key={generateKey(trimmedLine, index)} className="pdf-metadata-line">
+          <div key={`metadata-${index}`} className="pdf-metadata-line">
             <span className="pdf-metadata-key">{key}:</span>
             <span className="pdf-metadata-value">{value}</span>
           </div>
@@ -440,7 +459,7 @@ export default function Home() {
         const text = trimmedLine.replace(/^[•\-\*☒☐]\s*/, '');
         const isChecked = trimmedLine.startsWith('☒');
         formatted.push(
-          <div key={generateKey(text, index)} className="pdf-list-item">
+          <div key={`bullet-${index}`} className="pdf-list-item">
             <span className="pdf-bullet">{isChecked ? '☑' : '•'}</span>
             <span>{text}</span>
           </div>
@@ -449,7 +468,7 @@ export default function Home() {
       // Numbered list items (a., i., 1., etc.)
       else if (trimmedLine.match(/^[a-z]\.\s/) || trimmedLine.match(/^[ivx]+\.\s/) || trimmedLine.match(/^\d+\.\s/)) {
         formatted.push(
-          <div key={generateKey(trimmedLine, index)} className="pdf-numbered-item">
+          <div key={`numbered-${index}`} className="pdf-numbered-item">
             {trimmedLine}
           </div>
         );
@@ -458,7 +477,7 @@ export default function Home() {
       else if (trimmedLine.startsWith('>')) {
         const text = trimmedLine.replace(/^>\s*/, '');
         formatted.push(
-          <blockquote key={generateKey(text, index)} className="pdf-blockquote">
+          <blockquote key={`quote-${index}`} className="pdf-blockquote">
             {text}
           </blockquote>
         );
@@ -466,13 +485,13 @@ export default function Home() {
       // Separator lines (---, ===)
       else if (trimmedLine.match(/^[-=]{3,}$/)) {
         formatted.push(
-          <hr key={generateKey('separator', index)} className="pdf-separator" />
+          <hr key={`separator-${index}`} className="pdf-separator" />
         );
       }
       // Warning/Note indicators
       else if (trimmedLine.match(/^⚠️|^💡|^ℹ️|^NOTE:|^WARNING:/i)) {
         formatted.push(
-          <div key={generateKey(trimmedLine, index)} className="pdf-notice">
+          <div key={`notice-${index}`} className="pdf-notice">
             {trimmedLine}
           </div>
         );
@@ -480,7 +499,7 @@ export default function Home() {
       // Regular paragraph text
       else {
         formatted.push(
-          <p key={generateKey(trimmedLine, index)} className="pdf-paragraph">
+          <p key={`para-${index}`} className="pdf-paragraph">
             {trimmedLine}
           </p>
         );
@@ -501,24 +520,24 @@ export default function Home() {
     }
   }, [showToast]);
 
-  const sendMessage = async (e, promptText = null) => {
+  // Memoized sendMessage to prevent stale closures in child components
+  const sendMessage = useCallback(async (e, promptText = null) => {
     if (e) e.preventDefault();
     const messageToSend = promptText || inputValue;
-    const trimmedMessage = messageToSend.trim();
 
-    // Input validation
-    if (!trimmedMessage || isLoading) return;
+    // Sanitize control characters that might break parsing FIRST
+    const sanitizedMessage = messageToSend
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
+      .trim();
+
+    // Input validation AFTER sanitization
+    if (!sanitizedMessage || isLoading) return;
 
     // Character limit validation
-    if (trimmedMessage.length > PERFORMANCE.MAX_MESSAGE_LENGTH) {
+    if (sanitizedMessage.length > PERFORMANCE.MAX_MESSAGE_LENGTH) {
       showToast(ERROR_MESSAGES.MESSAGE_TOO_LONG(PERFORMANCE.MAX_MESSAGE_LENGTH), 'error');
       return;
     }
-
-    // Sanitize control characters that might break parsing
-    const sanitizedMessage = trimmedMessage
-      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
-      .slice(0, PERFORMANCE.MAX_MESSAGE_LENGTH);
 
     setInputValue('');
 
@@ -583,12 +602,12 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [inputValue, isLoading, showToast]); // Dependencies: inputValue, isLoading, showToast
 
   // Memoized callback for suggested prompts to prevent unnecessary re-renders
   const handlePromptClick = useCallback((promptText) => {
     sendMessage(null, promptText);
-  }, []);
+  }, [sendMessage]); // ✅ Fixed: Added sendMessage dependency
 
   const handleClear = async () => {
     setInputValue('');
@@ -608,27 +627,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-sage/20 flex flex-col">
       {/* Toast Notification */}
-      {toast && (
-        <div 
-          role="status" 
-          aria-live="polite" 
-          aria-atomic="true"
-          className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ease-out ${
-            toast.type === 'success' 
-              ? 'bg-growth text-white' 
-              : 'bg-blush border-2 border-red-500 text-red-700'
-          } animate-slide-in-right`}
-        >
-          <div className="flex items-center space-x-2">
-            {toast.type === 'success' ? (
-              <CheckCheck className="w-5 h-5" aria-hidden="true" />
-            ) : (
-              <AlertCircle className="w-5 h-5" aria-hidden="true" />
-            )}
-            <span className="font-medium">{toast.message}</span>
-          </div>
-        </div>
-      )}
+      <Toast toast={toast} />
 
       {/* Enhanced Header */}
       <header className="bg-white border-b border-rush-gray/20 sticky top-0 z-40 shadow-sm">
@@ -682,8 +681,7 @@ export default function Home() {
             className="flex-1 overflow-y-auto p-6 space-y-6"
             role="log"
             aria-label="Chat conversation history"
-            aria-live="polite"
-            aria-atomic="false"
+            aria-busy={isLoading}
           >
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full">
@@ -702,189 +700,21 @@ export default function Home() {
             ) : (
               messages.map((message, index) => (
                 <div
-                  key={generateKey(message.content.substring(0, 50), index)}
+                  key={generateKey(message, index)}
                   className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`}
                   style={{ animationDelay: `${index * 50}ms` }}
                   role="article"
                   aria-label={`${message.type === 'user' ? 'Your question' : 'Assistant response'} ${index + 1}`}
                 >
-                  {message.type === 'user' ? (
-                    <div className="flex items-start space-x-3 justify-end max-w-2xl">
-                      <div className="bg-gradient-to-br from-navy to-purple rounded-2xl px-5 py-4 shadow-lg hover:shadow-xl transition-shadow border border-navy/20">
-                        <p className="text-white font-medium voice-inclusive">{message.content}</p>
-                        <p className="text-white/90 text-xs mt-2 font-georgia">{message.timestamp?.toLocaleTimeString()}</p>
-                      </div>
-                      <div className="w-10 h-10 bg-gradient-to-br from-navy to-purple rounded-xl flex items-center justify-center flex-shrink-0 shadow-md border border-violet/30">
-                        <User className="w-5 h-5 text-white" />
-                      </div>
-                    </div>
-                  ) : message.type === 'error' ? (
-                    <div className="flex items-start space-x-3 w-full max-w-3xl">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blush to-red-400 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                        <AlertTriangle className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="bg-blush/40 border-2 border-red-400 rounded-2xl px-6 py-4 shadow-md">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <AlertCircle className="w-5 h-5 text-red-700" />
-                            <h3 className="font-semibold text-red-900">Error</h3>
-                          </div>
-                          <p className="text-red-900 leading-relaxed voice-accessible font-georgia">{message.content}</p>
-                          <p className="text-red-700 text-xs mt-2">{message.timestamp?.toLocaleTimeString()}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    // Answer + Source Document Evidence
-                    <div className="flex items-start space-x-3 w-full max-w-4xl">
-                      <div className="w-10 h-10 bg-gradient-to-br from-growth to-legacy rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
-                        <FileText className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1 space-y-4">
-                        {(() => {
-                          const { answer, fullDocument, content, metadata } = parseResponse(message.content);
-
-                          return (
-                            <>
-                              {/* Answer Section - PART 1 */}
-                              {answer && (
-                                <div className="answer-section">
-                                  <div className="answer-header">
-                                    <MessageSquare className="w-5 h-5 text-growth" />
-                                    <h3>Answer</h3>
-                                  </div>
-                                  <div className="answer-content">
-                                    <p className="voice-inclusive font-georgia leading-relaxed">{answer}</p>
-                                  </div>
-                                  <div className="flex justify-end mt-3">
-                                    <button
-                                      onClick={() => copyToClipboard(answer, `answer-${index}`)}
-                                      className="answer-copy-button-inline"
-                                      disabled={copiedIndex === `answer-${index}`}
-                                      aria-label={copiedIndex === `answer-${index}` ? 'Answer copied to clipboard' : 'Copy answer to clipboard'}
-                                      aria-live="polite"
-                                    >
-                                      {copiedIndex === `answer-${index}` ? (
-                                        <>
-                                          <CheckCheck className="w-4 h-4" aria-hidden="true" />
-                                          <span>Copied</span>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Copy className="w-4 h-4" aria-hidden="true" />
-                                          <span>Copy</span>
-                                        </>
-                                      )}
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Source Document Evidence Section - PART 2 */}
-                              <div className="evidence-section">
-                                <div className="evidence-header">
-                                  <BookOpen className="w-5 h-5 text-legacy" />
-                                  <h3>Source Document Evidence</h3>
-                                </div>
-
-                                <div className="pdf-document-container">
-                                  {/* PDF Document Header */}
-                                  <div className="pdf-header">
-                                    <div className="flex items-center justify-between mb-4">
-                                      <div className="flex items-center space-x-3">
-                                        <img src="/images/rush-logo.jpg" alt="Rush" className="h-8 object-contain" />
-                                        <div className="border-l border-rush-gray h-8"></div>
-                                        <div>
-                                          <h4 className="font-semibold text-legacy text-lg">Rush University Policy Document</h4>
-                                          <p className="text-xs text-rush-black/70">PolicyTech Database</p>
-                                        </div>
-                                      </div>
-                                      <button
-                                        onClick={() => copyToClipboard(fullDocument, `doc-${index}`)}
-                                        className="pdf-copy-button"
-                                        disabled={copiedIndex === `doc-${index}`}
-                                        aria-label={copiedIndex === `doc-${index}` ? 'Document copied to clipboard' : 'Copy full document to clipboard'}
-                                        aria-live="polite"
-                                      >
-                                        {copiedIndex === `doc-${index}` ? (
-                                          <>
-                                            <CheckCheck className="w-4 h-4" aria-hidden="true" />
-                                            <span>Copied</span>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <Copy className="w-4 h-4" aria-hidden="true" />
-                                            <span>Copy</span>
-                                          </>
-                                        )}
-                                      </button>
-                                    </div>
-
-                                    {/* Metadata Bar */}
-                                    {(metadata.policyNumber || metadata.policyTitle || metadata.effectiveDate || metadata.department) && (
-                                      <div className="pdf-metadata-bar">
-                                        {metadata.policyNumber && (
-                                          <span className="pdf-badge">
-                                            <FileText className="w-3 h-3" />
-                                            Policy #{metadata.policyNumber}
-                                          </span>
-                                        )}
-                                        {metadata.effectiveDate && (
-                                          <span className="pdf-badge">
-                                            <Clock className="w-3 h-3" />
-                                            {metadata.effectiveDate}
-                                          </span>
-                                        )}
-                                        {metadata.department && (
-                                          <span className="pdf-badge">
-                                            <Building2 className="w-3 h-3" />
-                                            {metadata.department}
-                                          </span>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  {/* PDF Document Body */}
-                                  <div className="pdf-body">
-                                    {formatDocumentContent(fullDocument)}
-                                  </div>
-
-                                  {/* PDF Document Footer */}
-                                  <div className="pdf-footer">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-rush-black/70">
-                                      <div>
-                                        <div className="mb-1">
-                                          <span className="font-semibold">Source:</span> Rush PolicyTech Database
-                                        </div>
-                                        <div>
-                                          <span className="font-semibold">Access:</span> Authorized Personnel Only
-                                        </div>
-                                      </div>
-                                      <div className="md:text-right">
-                                        <div className="mb-1">
-                                          <span className="font-semibold">Retrieved:</span> {message.timestamp?.toLocaleDateString('en-US', {
-                                            year: 'numeric',
-                                            month: 'short',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                          })}
-                                        </div>
-                                        <div>
-                                          <span className="font-semibold">Property of:</span> Rush University System for Health
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  )}
+                  <MessageItem
+                    message={message}
+                    index={index}
+                    parseResponse={parseResponse}
+                    formatDocumentContent={formatDocumentContent}
+                    copyToClipboard={copyToClipboard}
+                    copiedIndex={copiedIndex}
+                    generateKey={generateKey}
+                  />
                 </div>
               ))
             )}
