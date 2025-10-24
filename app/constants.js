@@ -75,3 +75,25 @@ export const SESSION_CONFIG = {
   SAME_SITE: 'lax',
   SECURE: process.env.NODE_ENV === 'production'
 };
+
+// Azure Polling Configuration
+export const AZURE_POLLING = {
+  MAX_POLL_TIME_MS: 120000,     // 2 minutes
+  POLL_INTERVAL_MS: 1000,       // 1 second
+  MAX_RETRIES: 3,               // Maximum retry attempts for transient failures
+  BACKOFF_MULTIPLIER: 1.5       // Exponential backoff multiplier
+};
+
+// Request Deduplication Configuration
+export const DEDUPLICATION = {
+  WINDOW_MS: 5000,              // 5 second window for duplicate detection
+  MAX_CACHE_SIZE: 100,          // Maximum cached request hashes
+  CLEANUP_THRESHOLD: 150        // Trigger cleanup at this size
+};
+
+// Response Validation Configuration
+export const RESPONSE_VALIDATION = {
+  MAX_RESPONSE_SIZE: 500000,    // 500KB maximum response size
+  MIN_CITATIONS: 0,             // Minimum citations (0 allows fallback messages)
+  REQUIRE_TWO_PART_STRUCTURE: true
+};

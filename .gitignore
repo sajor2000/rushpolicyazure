@@ -83,6 +83,18 @@ assets/docs/
 *_COMPLETE.md
 *_READY.md
 *_SUMMARY.md
+*_PROGRESS.md
+
+# Refactoring artifacts
+*-refactored.*
+*-old.*
+*.backup.*
+*.pre-refactor
+*_backup.*
+
+# Code review documents
+CODE_REVIEW_*.md
+REFACTORING_*.md
 
 # Test files (exclude examples)
 test-*.js
