@@ -9,7 +9,6 @@
 // API Endpoints
 export const API_ENDPOINTS = {
   AZURE_AGENT: '/api/azure-agent',
-  RESET: '/api/reset',
   HEALTH: '/api/health'
 };
 
@@ -18,7 +17,6 @@ export const PERFORMANCE = {
   MAX_MESSAGE_LENGTH: 2000,          // Maximum characters in user message
   MAX_METADATA_LINES: 50,            // Safety limit for metadata parsing
   TOAST_DURATION: 3000,              // Toast notification duration (ms)
-  SESSION_EXPIRY: 60 * 60 * 24,      // Session cookie expiry (24 hours in seconds)
   SCROLL_THRESHOLD: 100,             // Pixels from bottom to trigger auto-scroll
   CHARACTER_WARNING_THRESHOLD: 1800  // Show warning when approaching limit
 };
@@ -43,8 +41,7 @@ export const ERROR_MESSAGES = {
 export const SUCCESS_MESSAGES = {
   COPIED: 'Copied to clipboard!',
   RESPONSE_RECEIVED: 'Response received!',
-  CONVERSATION_CLEARED: 'Conversation cleared',
-  CONVERSATION_RESET: 'Conversation reset'
+  CONVERSATION_CLEARED: 'Conversation cleared'
 };
 
 // Azure AI Configuration
@@ -66,14 +63,6 @@ export const CORS_CONFIG = {
   ALLOWED_METHODS: 'GET, POST, OPTIONS',
   ALLOWED_HEADERS: 'Content-Type, Authorization',
   MAX_AGE: '86400'  // 24 hours
-};
-
-// Session Configuration
-export const SESSION_CONFIG = {
-  COOKIE_NAME: 'sessionId',
-  HTTP_ONLY: true,
-  SAME_SITE: 'lax',
-  SECURE: process.env.NODE_ENV === 'production'
 };
 
 // Azure Polling Configuration

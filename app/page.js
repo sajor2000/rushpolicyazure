@@ -228,19 +228,11 @@ export default function Home() {
     sendMessage(null, promptText);
   }, [sendMessage]); // ✅ Fixed: Added sendMessage dependency
 
-  const handleClear = async () => {
+  const handleClear = () => {
     setInputValue('');
     setMessages([]);
-    try {
-      await fetch(API_ENDPOINTS.AZURE_AGENT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: 'reset', resetConversation: true })
-      });
-      showToast(SUCCESS_MESSAGES.CONVERSATION_CLEARED);
-    } catch (error) {
-      console.log('Conversation reset requested');
-    }
+    showToast(SUCCESS_MESSAGES.CONVERSATION_CLEARED);
+    // Note: Backend is stateless - no need to call API to reset
   };
 
   return (
