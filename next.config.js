@@ -7,19 +7,21 @@ const nextConfig = {
   // CORS and Security headers
   async headers() {
     // Content Security Policy
-    // Note: 'unsafe-inline' for styles is required for Tailwind CSS
-    // Consider using nonces for inline scripts in future for stricter security
+    // Note: Development needs 'unsafe-inline' and 'unsafe-eval' for Next.js HMR and React
+    // Production should use nonces or hashes for better security
+    const isDev = process.env.NODE_ENV !== 'production';
+
     const ContentSecurityPolicy = `
       default-src 'self';
-      script-src 'self' https://fonts.googleapis.com;
+      script-src 'self' ${isDev ? "'unsafe-inline' 'unsafe-eval'" : ""} https://fonts.googleapis.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       font-src 'self' https://fonts.gstatic.com data:;
       img-src 'self' data: blob: https://fonts.googleapis.com https://fonts.gstatic.com;
-      connect-src 'self' https://*.azure.com https://*.microsoft.com https://*.services.ai.azure.com;
+      connect-src 'self' ${isDev ? "http://localhost:* ws://localhost:* ws://127.0.0.1:*" : ""} https://*.azure.com https://*.microsoft.com https://*.services.ai.azure.com;
       frame-ancestors 'none';
       base-uri 'self';
       form-action 'self';
-      upgrade-insecure-requests;
+      ${isDev ? "" : "upgrade-insecure-requests;"}
     `.replace(/\s{2,}/g, ' ').trim();
 
     // Get production domain for CORS - fail safely by restricting access
