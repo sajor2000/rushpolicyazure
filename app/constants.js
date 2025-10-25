@@ -47,8 +47,7 @@ export const SUCCESS_MESSAGES = {
 // Azure AI Configuration
 export const AZURE_CONFIG = {
   DEFAULT_ENDPOINT: 'https://rua-nonprod-ai-innovation.services.ai.azure.com/api/projects/rua-nonprod-ai-innovation-project',
-  DEFAULT_AGENT_ID: 'asst_301EhwakRXWsOCgGQt276WiU',
-  API_VERSION: '2024-05-01-preview'
+  DEFAULT_AGENT_ID: 'asst_301EhwakRXWsOCgGQt276WiU'
 };
 
 // Rate Limiting Configuration
@@ -83,6 +82,5 @@ export const DEDUPLICATION = {
 // Response Validation Configuration
 export const RESPONSE_VALIDATION = {
   MAX_RESPONSE_SIZE: 500000,    // 500KB maximum response size
-  MIN_CITATIONS: 0,             // Minimum citations (0 allows fallback messages)
   REQUIRE_TWO_PART_STRUCTURE: true
 };
