@@ -11,20 +11,8 @@ import {
 } from '../../constants';
 
 // Extracted utilities
-import {
-  checkRateLimit,
-  cleanupRateLimits,
-  generateRequestHash,
-  checkDuplicateRequest,
-  cacheResponse,
-  escapePromptInjection
-} from './security';
-import {
-  withRetry,
-  validateResponse,
-  postProcessResponse,
-  getClientIp
-} from './helpers';
+import { checkRateLimit, cleanupRateLimits, escapePromptInjection } from './security';
+import { withRetry, validateResponse, postProcessResponse, getClientIp } from './helpers';
 import { generateSystemPrompt } from './systemPrompt';
 
 // Initialize Azure AI Project client
@@ -35,25 +23,16 @@ const project = new AIProjectClient(
 
 const AGENT_ID = process.env.AZURE_AI_AGENT_ID || AZURE_CONFIG.DEFAULT_AGENT_ID;
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// STATELESS ARCHITECTURE FOR RAG ACCURACY
-// ═══════════════════════════════════════════════════════════════════════════════
-// NO thread storage - every request creates a fresh thread
-// This ensures:
-//   1. Zero conversation history between questions
-//   2. Fresh RAG database search for every query
-//   3. No hallucinations from previous context
-//   4. Maximum retrieval accuracy
-// ═══════════════════════════════════════════════════════════════════════════════
-
-// Security utilities, retry logic, and system prompt are now imported from:
-// - ./security.js (rate limiting, deduplication, sanitization)
-// - ./helpers.js (retry logic, response validation, IP extraction)
-// - ./systemPrompt.js (AI agent system prompt generation)
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// MAIN POST HANDLER
-// ═══════════════════════════════════════════════════════════════════════════════
+/**
+ * STATELESS ARCHITECTURE FOR RAG ACCURACY
+ *
+ * NO thread storage - every request creates a fresh thread
+ * This ensures:
+ *   1. Zero conversation history between questions
+ *   2. Fresh RAG database search for every query
+ *   3. No hallucinations from previous context
+ *   4. Maximum retrieval accuracy
+ */
 
 export async function POST(request) {
   const requestId = crypto.randomBytes(8).toString('hex');
@@ -62,41 +41,21 @@ export async function POST(request) {
   let conversationThread = null;
 
   try {
-    // ═══════════════════════════════════════════════════════════════════════════
-    // SECURITY: CONTENT-TYPE VALIDATION
-    // ═══════════════════════════════════════════════════════════════════════════
-    const contentType = request.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      console.warn(`[${requestId}] Invalid Content-Type:`, contentType);
-      return NextResponse.json({
-        error: 'Invalid Content-Type',
-        expected: 'application/json',
-        received: contentType || 'none'
-      }, { status: 415 }); // 415 Unsupported Media Type
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // SECURITY: RATE LIMITING
-    // ═══════════════════════════════════════════════════════════════════════════
     const ip = getClientIp(request);
 
     if (!checkRateLimit(ip)) {
       console.warn(`[${requestId}] Rate limit exceeded for IP:`, ip);
       return NextResponse.json({
         error: 'Rate limit exceeded',
-        hint: `Maximum ${RATE_LIMIT.MAX_REQUESTS} requests per minute. Please wait before trying again.`
+        hint: 'Please wait before trying again.'
       }, { status: 429 });
     }
 
     cleanupRateLimits();
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // SECURITY: INPUT VALIDATION
-    // ═══════════════════════════════════════════════════════════════════════════
     const body = await request.json();
     const { message } = body;
 
-    // Validate message exists and is correct type
     if (!message || typeof message !== 'string') {
       console.warn(`[${requestId}] Invalid message type:`, typeof message);
       return NextResponse.json({
@@ -105,12 +64,11 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    // Sanitize control characters first
+    // Sanitize control characters
     const sanitizedMessage = message
-      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
       .trim();
 
-    // Check if message is empty after sanitization
     if (sanitizedMessage.length === 0) {
       console.warn(`[${requestId}] Empty message after sanitization`);
       return NextResponse.json({
@@ -129,43 +87,16 @@ export async function POST(request) {
 
     console.log(`[${requestId}] Message validated:`, sanitizedMessage.length, 'characters');
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // SECURITY: REQUEST DEDUPLICATION
-    // ═══════════════════════════════════════════════════════════════════════════
-    const messageHash = generateRequestHash(sanitizedMessage);
-    const cachedResponse = checkDuplicateRequest(messageHash);
-
-    if (cachedResponse) {
-      console.log(`[${requestId}] ⚡ Returning cached response (duplicate request)`);
-      return NextResponse.json({
-        response: cachedResponse,
-        cached: true
-      });
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // CRITICAL FOR RAG ACCURACY: Create fresh thread
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Always create a fresh thread for each question to ensure:
-    // 1. Hallucinations from previous responses don't occur
-    // 2. Incorrect answers from conversation bleed-over are prevented
-    // 3. Fresh RAG database search is triggered
-    // 4. Maximum retrieval accuracy is maintained
-    //
-    // DO NOT store threads - we want ZERO conversation history
-
-    console.log(`[${requestId}] Creating new conversation thread for fresh RAG search (stateless mode)`);
+    console.log(`[${requestId}] Creating new conversation thread for fresh RAG search`);
     conversationThread = await withRetry(() =>
       project.agents.threads.create()
     );
     console.log(`[${requestId}] Fresh thread created:`, conversationThread.id);
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // SECURITY: PROMPT INJECTION DEFENSE
-    // ═══════════════════════════════════════════════════════════════════════════
+    // Prompt injection defense
     const escapedMessage = escapePromptInjection(sanitizedMessage);
 
-    // Create message in the thread with system prompt
+    // Create message in thread
     await withRetry(() =>
       project.agents.messages.create(
         conversationThread.id,
@@ -174,9 +105,7 @@ export async function POST(request) {
       )
     );
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // CREATE AND POLL RUN WITH TIMEOUT PROTECTION
-    // ═══════════════════════════════════════════════════════════════════════════
+    // Create and poll run with timeout protection
     let run = await withRetry(() =>
       project.agents.runs.create(conversationThread.id, AGENT_ID)
     );
@@ -189,7 +118,7 @@ export async function POST(request) {
     while (run.status === "queued" || run.status === "in_progress") {
       // Check for timeout
       if (Date.now() - startTime > MAX_POLL_TIME_MS || pollAttempts >= MAX_POLL_ATTEMPTS) {
-        console.error(`[${requestId}] ⚠️ Agent response timeout after`, Date.now() - startTime, 'ms');
+        console.error(`[${requestId}] Agent response timeout after`, Date.now() - startTime, 'ms');
         return NextResponse.json({
           error: ERROR_MESSAGES.TIMEOUT,
           details: `Agent did not respond within ${MAX_POLL_TIME_MS/1000} seconds`,
@@ -204,7 +133,6 @@ export async function POST(request) {
         pollAttempts++;
       } catch (pollError) {
         console.error(`[${requestId}] Polling error:`, pollError.message);
-        // Retry once, then fail
         if (pollAttempts > 2) {
           return NextResponse.json({
             error: 'Failed to check agent status',
@@ -234,9 +162,7 @@ export async function POST(request) {
       }, { status: 500 });
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // RETRIEVE MESSAGES WITH ERROR HANDLING
-    // ═══════════════════════════════════════════════════════════════════════════
+    // Retrieve messages
     let messages;
     try {
       messages = await project.agents.messages.list(conversationThread.id, { order: "asc" });
@@ -255,7 +181,7 @@ export async function POST(request) {
       }, { status: 500 });
     }
 
-    // Find the assistant's response
+    // Find assistant's response
     let assistantResponse = null;
     for await (const m of messages) {
       if (m.role === 'assistant') {
@@ -272,58 +198,41 @@ export async function POST(request) {
       return NextResponse.json({ error: ERROR_MESSAGES.NO_RESPONSE_AGENT }, { status: 500 });
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // RESPONSE VALIDATION AND PROCESSING
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    // Check response size
+    // Response validation and processing
     if (assistantResponse.length > RESPONSE_VALIDATION.MAX_RESPONSE_SIZE) {
-      console.warn(`[${requestId}] ⚠️ Response exceeds size limit:`, assistantResponse.length, 'bytes');
+      console.warn(`[${requestId}] Response exceeds size limit:`, assistantResponse.length, 'bytes');
       return NextResponse.json({
         error: 'Policy document too large to display',
         hint: 'Please contact PolicyTech to request this document directly',
         size: assistantResponse.length
-      }, { status: 413 }); // 413 Payload Too Large
+      }, { status: 413 });
     }
 
     console.log(`[${requestId}] Response length:`, assistantResponse.length, 'characters');
 
-    // Ensure the response is a valid string
     let cleanResponse = typeof assistantResponse === 'string'
       ? assistantResponse
       : String(assistantResponse);
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // POST-PROCESSING: Clean formatting while preserving structure
-    // ═══════════════════════════════════════════════════════════════════════════
+    // Post-processing: Clean formatting while preserving structure
     cleanResponse = postProcessResponse(cleanResponse);
     console.log(`[${requestId}] Response post-processed:`, cleanResponse.length, 'characters');
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // RAG ACCURACY MONITORING
-    // ═══════════════════════════════════════════════════════════════════════════
+    // RAG accuracy monitoring
     const validation = validateResponse(cleanResponse, requestId);
 
-    // Log warnings for any validation failures
     if (!validation.isValid) {
       validation.warnings.forEach(warning =>
         console.warn(`[${requestId}] ⚠️ RAG WARNING: ${warning}`)
       );
     }
 
-    // Log successful validations
     console.log(`[${requestId}] ✅ RAG VALIDATION: Found ${validation.citationCount} citations`);
     console.log(`[${requestId}] ✅ RAG VALIDATION: Fresh thread created for this request (ID: ${conversationThread.id})`);
     if (validation.hasAnswer && validation.hasDocument) {
       console.log(`[${requestId}] ✅ RAG VALIDATION: Response has correct two-part structure`);
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // CACHE RESPONSE FOR DEDUPLICATION
-    // ═══════════════════════════════════════════════════════════════════════════
-    cacheResponse(messageHash, cleanResponse);
-
-    // Return response (stateless - no session cookies needed)
     return NextResponse.json({ response: cleanResponse });
 
   } catch (error) {
@@ -344,10 +253,7 @@ export async function POST(request) {
       }, { status: 500 });
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // SECURITY: SANITIZED ERROR RESPONSES
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Log full error server-side, return sanitized error to client
+    // Sanitized error responses
     console.error(`[${requestId}] Full error:`, {
       message: error.message,
       stack: error.stack,
@@ -356,58 +262,33 @@ export async function POST(request) {
 
     return NextResponse.json({
       error: 'An unexpected error occurred while processing your request',
-      requestId: requestId, // For support tracking
+      requestId: requestId,
       hint: 'Please try again or contact support if the issue persists'
     }, { status: 500 });
 
   } finally {
-    // ═══════════════════════════════════════════════════════════════════════════
-    // CRITICAL FIX: THREAD CLEANUP
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Always clean up thread even if request fails
+    // Thread cleanup
     if (conversationThread) {
       try {
         await project.agents.threads.delete(conversationThread.id);
         console.log(`[${requestId}] ✅ Thread cleaned up:`, conversationThread.id);
       } catch (cleanupError) {
         console.error(`[${requestId}] ⚠️ Failed to cleanup thread:`, cleanupError.message);
-        // Don't throw - cleanup failure shouldn't affect response
       }
     }
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// HTTP METHOD VALIDATION
-// ═══════════════════════════════════════════════════════════════════════════════
+// HTTP method validation - consolidated handler
+const methodNotAllowed = () => NextResponse.json({
+  error: 'Method not allowed',
+  allowed: ['POST']
+}, { status: 405 });
 
-export async function GET() {
-  return NextResponse.json({
-    error: 'Method not allowed',
-    allowed: ['POST']
-  }, { status: 405 });
-}
-
-export async function PUT() {
-  return NextResponse.json({
-    error: 'Method not allowed',
-    allowed: ['POST']
-  }, { status: 405 });
-}
-
-export async function DELETE() {
-  return NextResponse.json({
-    error: 'Method not allowed',
-    allowed: ['POST']
-  }, { status: 405 });
-}
-
-export async function PATCH() {
-  return NextResponse.json({
-    error: 'Method not allowed',
-    allowed: ['POST']
-  }, { status: 405 });
-}
+export const GET = methodNotAllowed;
+export const PUT = methodNotAllowed;
+export const DELETE = methodNotAllowed;
+export const PATCH = methodNotAllowed;
 
 export async function OPTIONS() {
   return new NextResponse(null, {

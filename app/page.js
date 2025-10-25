@@ -14,7 +14,7 @@ import { useClipboard } from './hooks/useClipboard';
 
 // Utility Functions
 import { parseResponse } from './utils/policyParser';
-import { parseMetadataHeader, formatDocumentContent } from './utils/documentFormatter';
+import { formatDocumentContent } from './utils/documentFormatter';
 
 // Timestamp-based key generation for stable, unique React keys
 function generateKey(message, index) {
@@ -109,7 +109,7 @@ export default function Home() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -228,12 +228,13 @@ export default function Home() {
     sendMessage(null, promptText);
   }, [sendMessage]); // ✅ Fixed: Added sendMessage dependency
 
-  const handleClear = () => {
+  // Memoized clear handler to prevent unnecessary re-renders
+  const handleClear = useCallback(() => {
     setInputValue('');
     setMessages([]);
     showToast(SUCCESS_MESSAGES.CONVERSATION_CLEARED);
     // Note: Backend is stateless - no need to call API to reset
-  };
+  }, [showToast]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-sage/20 flex flex-col">

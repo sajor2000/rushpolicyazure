@@ -45,16 +45,16 @@ The application uses Azure GPT-5 Chat Model via Azure AI Agent:
    - Zero API keys required (Managed Identity authentication)
 
 ### Response Format Protocol
-Both AI endpoints expect responses in a structured format:
+The Azure AI Agent returns responses in a structured two-part format:
 ```
-SYNTHESIZED_ANSWER:
-[2-3 paragraph conservative, factual answer]
+ANSWER:
+[2-3 sentence conservative, factual answer using verbatim quotes]
 
 FULL_POLICY_DOCUMENT:
 [Complete policy text with metadata]
 ```
 
-The frontend parser ([app/page.js:79-107](app/page.js#L79-L107)) extracts:
+The frontend parser extracts:
 - Synthesized answer (user-facing summary)
 - Full document text (expandable section)
 - Metadata: policy number, effective date, department, key sections
@@ -68,12 +68,12 @@ The frontend parser ([app/page.js:79-107](app/page.js#L79-L107)) extracts:
 ### API Routes Structure
 ```
 app/api/
-├── azure-agent/     # Azure AI Projects agent endpoint
-├── chat/            # OpenAI Assistant endpoint
-├── debug/           # Debugging utilities
-├── health/          # Health check endpoint
-├── reset/           # Conversation reset endpoint
-└── test-env/        # Environment validation endpoint
+├── azure-agent/     # Azure AI Projects agent endpoint (primary)
+│   ├── route.js     # Main POST handler
+│   ├── helpers.js   # Retry logic, validation, response processing
+│   ├── security.js  # Rate limiting, input sanitization
+│   └── systemPrompt.js  # Zero-hallucination RAG prompt
+└── health/          # Health check endpoint
 ```
 
 ## RAG Architecture & Zero-Hallucination Design
@@ -82,25 +82,25 @@ app/api/
 
 **The system is optimized for maximum RAG accuracy and zero hallucinations through:**
 
-1. **Stateless Thread Architecture** ([app/api/azure-agent/route.js:15-23](app/api/azure-agent/route.js#L15-L23))
+1. **Stateless Thread Architecture** (app/api/azure-agent/route.js:26-35)
    - Every request creates a fresh conversation thread
    - No thread storage or caching between requests
    - Zero conversation history between questions
    - Ensures every query triggers a fresh RAG database search
 
-2. **Zero-Hallucination Prompt Engineering** ([app/api/azure-agent/route.js:56-76](app/api/azure-agent/route.js#L56-L76))
+2. **Zero-Hallucination Prompt Engineering** (app/api/azure-agent/systemPrompt.js)
    - Explicit instructions to never paraphrase or infer
    - Forbidden phrases list to prevent common hallucination patterns
    - Requirement for verbatim quotes with citations
    - Fallback message when information not in RAG database
 
-3. **RAG Accuracy Monitoring** ([app/api/azure-agent/route.js:253-293](app/api/azure-agent/route.js#L253-L293))
+3. **RAG Accuracy Monitoring** (app/api/azure-agent/helpers.js:validateResponse)
    - Citation count validation (warns if zero citations)
    - Fresh thread confirmation logging
    - Response structure validation (two-part format)
    - Suspicious phrase detection (e.g., "I believe", "typically")
 
-4. **Response Post-Processing** ([app/api/azure-agent/route.js:227-248](app/api/azure-agent/route.js#L227-L248))
+4. **Response Post-Processing** (app/api/azure-agent/helpers.js:postProcessResponse)
    - Extracts citation marks 【source†file.pdf】 from body
    - Removes `**` markdown formatting
    - Cleans excessive whitespace
@@ -138,12 +138,6 @@ AZURE_AI_ENDPOINT=https://rua-nonprod-ai-innovation.services.ai.azure.com/api/pr
 AZURE_AI_AGENT_ID=asst_301EhwakRXWsOCgGQt276WiU
 ```
 
-### Optional for OpenAI Assistant
-```env
-AZURE_OPENAI_API_KEY=your_key_here
-AZURE_OPENAI_ENDPOINT=https://your-endpoint.openai.azure.com/
-ASSISTANT_ID=asst_xxxxxxxxxxxxx
-```
 
 ### Azure Authentication Methods (for Azure AI Agent)
 `DefaultAzureCredential` tries in order:
@@ -195,20 +189,16 @@ Neutrals: 'rush-black' (#5F5858), 'rush-gray' (#AFAEAF)
 
 ### Thread Management
 
-**Azure AI Agent (Primary)**:
+**Azure AI Agent**:
 - **Stateless architecture**: Creates a fresh thread for EVERY request
 - **No thread reuse**: Zero conversation history between questions
 - **No thread storage**: Threads are never cached or persisted
+- **Thread cleanup**: Automatic deletion after response (see `finally` block in route.js)
 - **Purpose**: Ensures every query triggers a fresh RAG database search for maximum accuracy
+- **Rate limiting**: 20 requests per minute per IP to prevent abuse
 
-**OpenAI Assistant (Legacy)**:
-- **Stateful architecture**: Maintains conversation context via threads
-- **Thread creation**: On first message or after reset
-- **Thread reuse**: Same thread for subsequent messages in conversation
-- **Thread reset**: Via "Clear Conversation" button
-- **Storage**: In-memory (lost on server restart)
-
-**Note**: The Azure AI Agent's stateless design prevents hallucinations by forcing fresh RAG searches. The OpenAI Assistant endpoint maintains state for conversational continuity but may be less accurate for policy retrieval.
+**Why Stateless?**
+The stateless design prevents hallucinations by forcing fresh RAG searches for every question, eliminating context bleed-over that could lead to incorrect answers based on previous queries.
 
 ## Deployment
 
@@ -250,11 +240,11 @@ The response parser is critical for UI display. When modifying:
 
 ### AI Backend Integration
 When modifying AI integration:
-1. Maintain structured response format (SYNTHESIZED_ANSWER, FULL_POLICY_DOCUMENT)
-2. Update both endpoints if changing protocol
-3. Test thread creation and reuse
+1. Maintain structured response format (ANSWER, FULL_POLICY_DOCUMENT)
+2. Preserve stateless architecture - no thread caching/reuse
+3. Test thread creation and cleanup
 4. Implement proper error handling with actionable messages
-5. Log important events for debugging
+5. Log important events for debugging, especially RAG validation warnings
 
 ## Security Considerations
 
@@ -281,11 +271,6 @@ When modifying AI integration:
 3. Check endpoint URL format (must include `/api/projects/...`)
 4. Review [scripts/test-azure-agent.js](scripts/test-azure-agent.js) for standalone testing
 
-### OpenAI Assistant not available
-This is expected if credentials not configured. The app gracefully shows:
-- "OpenAI Assistant not available" message
-- Suggestion to switch to Azure AI Agent
-- Returns HTTP 503 with helpful error details
 
 ### Build failures
 - Ensure Node.js 18+ installed

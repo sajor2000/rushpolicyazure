@@ -72,13 +72,6 @@ export const AZURE_POLLING = {
   BACKOFF_MULTIPLIER: 1.5       // Exponential backoff multiplier
 };
 
-// Request Deduplication Configuration
-export const DEDUPLICATION = {
-  WINDOW_MS: 5000,              // 5 second window for duplicate detection
-  MAX_CACHE_SIZE: 100,          // Maximum cached request hashes
-  CLEANUP_THRESHOLD: 150        // Trigger cleanup at this size
-};
-
 // Response Validation Configuration
 export const RESPONSE_VALIDATION = {
   MAX_RESPONSE_SIZE: 500000,    // 500KB maximum response size

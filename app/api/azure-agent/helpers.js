@@ -54,16 +54,12 @@ export function validateResponse(response, requestId) {
   // Check response size
   if (response.length > RESPONSE_VALIDATION.MAX_RESPONSE_SIZE) {
     warnings.push('Response exceeds maximum size');
-    console.warn(`[${requestId}] ⚠️ RAG WARNING: Response too large (${response.length} chars)`);
   }
 
   // Check for citation marks 【source†file.pdf】
   const citationCount = (response.match(/【[^】]+】/g) || []).length;
   if (citationCount === 0) {
     warnings.push('No citations found - possible hallucination');
-    console.warn(`[${requestId}] ⚠️ RAG WARNING: No citations found in response - possible hallucination`);
-  } else {
-    console.log(`[${requestId}] ✅ RAG VALIDATION: Found ${citationCount} citations`);
   }
 
   // Check for two-part structure (ANSWER: and FULL_POLICY_DOCUMENT:)
@@ -73,9 +69,6 @@ export function validateResponse(response, requestId) {
   if (RESPONSE_VALIDATION.REQUIRE_TWO_PART_STRUCTURE) {
     if (!hasAnswer || !hasDocument) {
       warnings.push('Missing two-part structure (ANSWER + FULL_POLICY_DOCUMENT)');
-      console.warn(`[${requestId}] ⚠️ RAG WARNING: Response missing proper structure (hasAnswer: ${hasAnswer}, hasDocument: ${hasDocument})`);
-    } else {
-      console.log(`[${requestId}] ✅ RAG VALIDATION: Response has correct two-part structure`);
     }
   }
 
@@ -95,7 +88,6 @@ export function validateResponse(response, requestId) {
 
   if (foundSuspicious.length > 0) {
     warnings.push(`Contains suspicious phrases: ${foundSuspicious.join(', ')}`);
-    console.warn(`[${requestId}] ⚠️ RAG WARNING: Response contains suspicious phrases:`, foundSuspicious);
   }
 
   return {

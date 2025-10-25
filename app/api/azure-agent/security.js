@@ -1,16 +1,13 @@
 /**
  * Security Utilities for Azure AI Agent
  *
- * Provides rate limiting, request deduplication, and input sanitization
- * to protect the API from abuse and ensure safe operation.
+ * Provides rate limiting and input sanitization to protect the API
+ * from abuse and ensure safe operation.
  */
 
-import crypto from 'crypto';
-import { RATE_LIMIT, DEDUPLICATION } from '../../constants';
+import { RATE_LIMIT } from '../../constants';
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// RATE LIMITING
-// ═══════════════════════════════════════════════════════════════════════════════
+// Rate limiting storage
 const requestCounts = new Map(); // IP -> { count, resetTime }
 
 /**
@@ -52,61 +49,6 @@ export function cleanupRateLimits() {
     }
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// REQUEST DEDUPLICATION
-// ═══════════════════════════════════════════════════════════════════════════════
-const recentRequests = new Map(); // hash -> { timestamp, response }
-
-/**
- * Generate hash for request deduplication
- * @param {string} message - User message to hash
- * @returns {string} SHA-256 hash of normalized message
- */
-export function generateRequestHash(message) {
-  return crypto.createHash('sha256')
-    .update(message.trim().toLowerCase())
-    .digest('hex');
-}
-
-/**
- * Check if request is duplicate and return cached response if exists
- * @param {string} hash - Request hash
- * @returns {string|null} Cached response or null if not duplicate
- */
-export function checkDuplicateRequest(hash) {
-  const existing = recentRequests.get(hash);
-  if (existing && Date.now() - existing.timestamp < DEDUPLICATION.WINDOW_MS) {
-    return existing.response;
-  }
-  return null;
-}
-
-/**
- * Cache response for request deduplication
- * @param {string} hash - Request hash
- * @param {string} response - Response to cache
- */
-export function cacheResponse(hash, response) {
-  recentRequests.set(hash, {
-    timestamp: Date.now(),
-    response
-  });
-
-  // Cleanup if cache gets too large
-  if (recentRequests.size > DEDUPLICATION.CLEANUP_THRESHOLD) {
-    const cutoff = Date.now() - DEDUPLICATION.WINDOW_MS;
-    for (const [h, data] of recentRequests.entries()) {
-      if (data.timestamp < cutoff) {
-        recentRequests.delete(h);
-      }
-    }
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// INPUT SANITIZATION
-// ═══════════════════════════════════════════════════════════════════════════════
 
 /**
  * Escape prompt injection attempts in user input
