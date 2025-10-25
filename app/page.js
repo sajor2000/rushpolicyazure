@@ -7,14 +7,13 @@ import { PERFORMANCE, ERROR_MESSAGES, SUCCESS_MESSAGES, API_ENDPOINTS } from './
 // Components
 import Toast from './components/chat/Toast';
 import MessageItem from './components/chat/MessageItem';
-import ChatInput from './components/chat/ChatInput';
 
 // Custom Hooks
 import { useToast } from './hooks/useToast';
 import { useClipboard } from './hooks/useClipboard';
-import { useResponseParser } from './hooks/useResponseParser';
 
 // Utility Functions
+import { parseResponse } from './utils/policyParser';
 import { parseMetadataHeader, formatDocumentContent } from './utils/documentFormatter';
 
 // Timestamp-based key generation for stable, unique React keys
@@ -84,33 +83,29 @@ export default function Home() {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [copiedIndex, setCopiedIndex] = useState(null);
-  const [toast, setToast] = useState(null);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   const abortControllerRef = useRef(null);
-  const toastTimeoutRef = useRef(null);
 
-  const scrollToBottom = () => {
+  // Use custom hooks for toast and clipboard functionality
+  const { toast, showToast } = useToast();
+  const { copiedIndex, copyToClipboard } = useClipboard(showToast);
+
+  const scrollToBottom = useCallback(() => {
     // Check if user prefers reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const scrollBehavior = prefersReducedMotion ? 'auto' : 'smooth';
 
     // Only auto-scroll if user is near bottom (within SCROLL_THRESHOLD pixels)
     const container = messagesContainerRef.current;
-    if (container) {
-      const isNearBottom =
-        container.scrollHeight - container.scrollTop - container.clientHeight < PERFORMANCE.SCROLL_THRESHOLD;
+    const shouldScroll = !container ||
+      (container.scrollHeight - container.scrollTop - container.clientHeight < PERFORMANCE.SCROLL_THRESHOLD);
 
-      if (isNearBottom) {
-        messagesEndRef.current?.scrollIntoView({ behavior: scrollBehavior });
-      }
-    } else {
-      // Fallback if container ref not available
+    if (shouldScroll) {
       messagesEndRef.current?.scrollIntoView({ behavior: scrollBehavior });
     }
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -141,44 +136,8 @@ export default function Home() {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
-      // Clear toast timeout
-      if (toastTimeoutRef.current) {
-        clearTimeout(toastTimeoutRef.current);
-      }
     };
   }, []);
-
-  const showToast = useCallback((message, type = 'success') => {
-    // Clear existing timeout to prevent race conditions
-    if (toastTimeoutRef.current) {
-      clearTimeout(toastTimeoutRef.current);
-    }
-
-    setToast({ message, type });
-
-    // Set new timeout with ref tracking
-    toastTimeoutRef.current = setTimeout(() => {
-      setToast(null);
-      toastTimeoutRef.current = null;
-    }, 3000);
-  }, []);
-
-  // Get parseResponse from custom hook (extracts answer, document, and metadata)
-  const { parseResponse } = useResponseParser();
-
-  // Import formatDocumentContent from utils (handles PDF-style formatting and metadata boxes)
-  // Note: formatDocumentContent internally calls parseMetadataHeader, so no need to wrap it here
-
-  const copyToClipboard = useCallback(async (text, index) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedIndex(index);
-      showToast(SUCCESS_MESSAGES.COPIED);
-      setTimeout(() => setCopiedIndex(null), 2000);
-    } catch (err) {
-      showToast(ERROR_MESSAGES.COPY_FAILED, 'error');
-    }
-  }, [showToast]);
 
   // Memoized sendMessage to prevent stale closures in child components
   const sendMessage = useCallback(async (e, promptText = null) => {

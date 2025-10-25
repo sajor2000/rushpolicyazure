@@ -42,7 +42,7 @@ export default function ChatInput({
             ref={inputRef}
             type="text"
             value={inputValue}
-            onChange={(e) => setInputValue(e.value)}
+            onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();

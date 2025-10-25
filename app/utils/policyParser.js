@@ -5,6 +5,8 @@
  * Handles the two-part format: ANSWER + FULL_POLICY_DOCUMENT
  */
 
+import { parseDocumentMetadata } from './documentFormatter';
+
 /**
  * Parse AI response into answer and document sections with metadata
  * @param {string} content - Full response content from Azure AI Agent
@@ -43,21 +45,18 @@ export function parseResponse(content) {
     }
   }
 
-  // Extract key metadata from the full document section
-  const policyNumberMatch = fullDocument.match(/(?:Policy\s*(?:Number|#)?|Reference\s*Number)\s*:?\s*([A-Z0-9\-]+)/i);
-  const titleMatch = fullDocument.match(/(?:Policy\s*Title)\s*:?\s*([^\n]+)/i);
-  const effectiveDateMatch = fullDocument.match(/(?:Effective\s*Date|Date\s*Approved)\s*:?\s*([^\n]+)/i);
-  const departmentMatch = fullDocument.match(/(?:Department|Applies\s*To|Document\s*Owner)\s*:?\s*([^\n]+)/i);
+  // Extract key metadata from the full document section using shared utility
+  const metadata = parseDocumentMetadata(fullDocument);
 
   return {
     answer: answer,
     fullDocument: fullDocument,
     content: content, // Keep full content for backward compatibility
     metadata: {
-      policyNumber: policyNumberMatch ? policyNumberMatch[1].trim() : null,
-      policyTitle: titleMatch ? titleMatch[1].trim() : null,
-      effectiveDate: effectiveDateMatch ? effectiveDateMatch[1].trim() : null,
-      department: departmentMatch ? departmentMatch[1].trim() : null,
+      policyNumber: metadata.policyNumber,
+      policyTitle: metadata.policyTitle,
+      effectiveDate: metadata.effectiveDate,
+      department: metadata.department,
     }
   };
 }

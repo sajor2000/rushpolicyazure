@@ -81,9 +81,7 @@ export async function POST(request) {
     // ═══════════════════════════════════════════════════════════════════════════
     // SECURITY: RATE LIMITING
     // ═══════════════════════════════════════════════════════════════════════════
-    const ip = request.headers.get('x-forwarded-for') ||
-               request.headers.get('x-real-ip') ||
-               'unknown';
+    const ip = getClientIp(request);
 
     if (!checkRateLimit(ip)) {
       console.warn(`[${requestId}] Rate limit exceeded for IP:`, ip);
@@ -301,88 +299,26 @@ export async function POST(request) {
     // ═══════════════════════════════════════════════════════════════════════════
     // POST-PROCESSING: Clean formatting while preserving structure
     // ═══════════════════════════════════════════════════════════════════════════
-
-    // Step 1: Extract all citation marks before removing them
-    const citations = [];
-    const citationRegex = /【([^】]{1,200})】/g; // Limit capture group to prevent ReDoS
-    let match;
-    let iterationCount = 0;
-    const MAX_ITERATIONS = 1000;
-
-    while ((match = citationRegex.exec(cleanResponse)) !== null) {
-      if (++iterationCount > MAX_ITERATIONS) {
-        console.warn(`[${requestId}] ⚠️ Citation extraction exceeded max iterations`);
-        break;
-      }
-      citations.push(match[1].substring(0, 200));
-    }
-
-    // Step 2: Clean formatting ONLY (keep PART 1 and PART 2 structure)
-    cleanResponse = cleanResponse
-      // Remove citation marks from body (will add at bottom)
-      .replace(/【[^】]+】/g, '')
-      // Remove ** markdown bold markers
-      .replace(/\*\*/g, '')
-      // Clean up excessive whitespace
-      .replace(/\n{3,}/g, '\n\n')                  // Reduce triple+ newlines to double
-      .replace(/^\s+$\n/gm, '')                     // Remove whitespace-only lines
-      .replace(/\s+$/gm, '')                        // Remove trailing whitespace from each line
-      .trim();                                      // Remove leading/trailing whitespace
-
-    // Step 3: Add citations at the bottom if any were found
-    if (citations.length > 0) {
-      const uniqueCitations = [...new Set(citations)]; // Remove duplicates
-      cleanResponse += '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-      cleanResponse += 'SOURCE CITATIONS\n';
-      cleanResponse += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-      uniqueCitations.forEach((citation, index) => {
-        cleanResponse += `[${index + 1}] ${citation}\n`;
-      });
-    }
-
-    console.log(`[${requestId}] Cleaned response length:`, cleanResponse.length, 'characters');
-    console.log(`[${requestId}] Citations extracted:`, citations.length);
+    cleanResponse = postProcessResponse(cleanResponse);
+    console.log(`[${requestId}] Response post-processed:`, cleanResponse.length, 'characters');
 
     // ═══════════════════════════════════════════════════════════════════════════
     // RAG ACCURACY MONITORING
     // ═══════════════════════════════════════════════════════════════════════════
-    // Validate response quality to detect potential hallucinations
+    const validation = validateResponse(cleanResponse, requestId);
 
-    // 1. Citation count validation
-    if (citations.length === 0) {
-      console.warn(`[${requestId}] ⚠️ RAG WARNING: No citations found in response - possible hallucination or general response`);
-    } else {
-      console.log(`[${requestId}] ✅ RAG VALIDATION: Found`, citations.length, 'citations');
+    // Log warnings for any validation failures
+    if (!validation.isValid) {
+      validation.warnings.forEach(warning =>
+        console.warn(`[${requestId}] ⚠️ RAG WARNING: ${warning}`)
+      );
     }
 
-    // 2. Fresh thread confirmation
-    console.log(`[${requestId}] ✅ RAG VALIDATION: Fresh thread created for this request (ID:`, conversationThread.id, ')');
-
-    // 3. Response structure validation
-    const hasPart1 = cleanResponse.includes('SYNTHESIZED ANSWER') || cleanResponse.includes('ANSWER:');
-    const hasPart2 = cleanResponse.includes('FULL_POLICY_DOCUMENT') || cleanResponse.includes('RUSH UNIVERSITY SYSTEM FOR HEALTH');
-
-    if (!hasPart1 || !hasPart2) {
-      console.warn(`[${requestId}] ⚠️ RAG WARNING: Response missing expected structure (Part 1:`, hasPart1, ', Part 2:', hasPart2, ')');
-    } else {
+    // Log successful validations
+    console.log(`[${requestId}] ✅ RAG VALIDATION: Found ${validation.citationCount} citations`);
+    console.log(`[${requestId}] ✅ RAG VALIDATION: Fresh thread created for this request (ID: ${conversationThread.id})`);
+    if (validation.hasAnswer && validation.hasDocument) {
       console.log(`[${requestId}] ✅ RAG VALIDATION: Response has correct two-part structure`);
-    }
-
-    // 4. Suspicious phrase detection (common hallucination indicators)
-    const suspiciousPhrases = [
-      'based on my knowledge',
-      'i believe',
-      'in my experience',
-      'generally speaking',
-      'typically',
-      'usually'
-    ];
-
-    const lowerResponse = cleanResponse.toLowerCase();
-    const foundSuspicious = suspiciousPhrases.filter(phrase => lowerResponse.includes(phrase));
-
-    if (foundSuspicious.length > 0) {
-      console.warn(`[${requestId}] ⚠️ RAG WARNING: Response contains suspicious phrases:`, foundSuspicious);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
