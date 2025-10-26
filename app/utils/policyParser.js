@@ -22,10 +22,10 @@ export function parseResponse(content) {
   const answerMatch = content.match(/ANSWER:\s*([\s\S]*?)(?=━+\s*PART 2|FULL_POLICY_DOCUMENT:|$)/i);
 
   // Try multiple patterns to extract the full document:
-  // 1. Look for FULL_POLICY_DOCUMENT: marker
+  // 1. Look for FULL_POLICY_DOCUMENT: marker (stop at separator line before SOURCE CITATIONS)
   // 2. Look for RUSH UNIVERSITY SYSTEM FOR HEALTH header (fallback)
-  const documentMatch = content.match(/FULL_POLICY_DOCUMENT:\s*([\s\S]*?)(?=━+\s*SOURCE CITATIONS|$)/i) ||
-                       content.match(/(?:PART 2.*?\n+)?(RUSH UNIVERSITY SYSTEM FOR HEALTH[\s\S]*?)(?=━+\s*SOURCE CITATIONS|$)/i);
+  const documentMatch = content.match(/FULL_POLICY_DOCUMENT:\s*([\s\S]*?)(?=\n{2,}━+|$)/i) ||
+                       content.match(/(?:PART 2.*?\n+)?(RUSH UNIVERSITY SYSTEM FOR HEALTH[\s\S]*?)(?=\n{2,}━+|$)/i);
 
   if (answerMatch && answerMatch[1]) {
     // Clean up the answer (remove separator lines and extra whitespace)
