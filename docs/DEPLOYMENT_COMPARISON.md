@@ -68,7 +68,7 @@ Medium Production: ~$50-100/month
 Basic Plan: ~$55/month
 Standard Plan: ~$100/month
 Premium Plan: ~$200+/month
-+ Azure OpenAI API costs
++ Azure AI Agent API costs
 + Application Insights costs
 ```
 

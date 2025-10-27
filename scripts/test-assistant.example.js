@@ -1,5 +1,8 @@
-// Quick test script to verify your assistant is working
-// Run with: node test-assistant.js
+// ⚠️ DEPRECATED: This script is for the legacy Azure OpenAI Assistants API
+// ⚠️ The application now uses Azure AI Agent (not Azure OpenAI)
+// ⚠️ Use scripts/test-azure-agent.js instead for testing the current setup
+//
+// This file is kept as a reference example only.
 
 import { AzureOpenAI } from 'openai';
 import * as dotenv from 'dotenv';

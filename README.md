@@ -80,11 +80,12 @@ Open [http://localhost:5000](http://localhost:5000) in your browser.
 rush-policy-chat/
 ├── app/
 │   ├── api/
-│   │   ├── chat/          # Main chat endpoint (Azure OpenAI)
-│   │   ├── debug/         # Debugging utilities
-│   │   ├── health/        # Health check endpoint
-│   │   ├── reset/         # Conversation reset
-│   │   └── test-env/      # Environment validation
+│   │   ├── azure-agent/   # Azure AI Agent endpoint (primary)
+│   │   │   ├── route.js   # Main POST handler
+│   │   │   ├── helpers.js # Retry logic, validation
+│   │   │   ├── security.js # Rate limiting
+│   │   │   └── systemPrompt.js # RAG prompt
+│   │   └── health/        # Health check endpoint
 │   ├── globals.css        # Rush brand styles
 │   ├── layout.js          # Root layout with metadata
 │   ├── loading.js         # Loading states

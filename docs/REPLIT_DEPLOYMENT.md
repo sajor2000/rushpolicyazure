@@ -12,10 +12,13 @@ This guide explains how to deploy the Rush Policy Chat Assistant on Replit for b
    - Add the following environment variables:
 
 ```
-AZURE_OPENAI_ENDPOINT=https://prodkmnlpopenaiastus.openai.azure.com/
-AZURE_OPENAI_API_KEY=your-api-key-here
-ASSISTANT_ID=asst_your_assistant_id
-VECTOR_STORE_ID=vs_your_vector_store_id
+AZURE_AI_ENDPOINT=https://rua-nonprod-ai-innovation.services.ai.azure.com/api/projects/rua-nonprod-ai-innovation-project
+AZURE_AI_AGENT_ID=asst_301EhwakRXWsOCgGQt276WiU
+
+# Optional: Azure Authentication (if not using Managed Identity)
+# AZURE_CLIENT_ID=your-client-id
+# AZURE_CLIENT_SECRET=your-client-secret
+# AZURE_TENANT_ID=your-tenant-id
 ```
 
 ### Step 2: Development Testing
@@ -26,9 +29,8 @@ VECTOR_STORE_ID=vs_your_vector_store_id
    ```
    
 2. **Test the environment**
-   - Visit `/api/test-env` to verify environment variables
    - Visit `/api/health` to check application health
-   - Visit `/api/debug` to test Azure OpenAI connection
+   - Run `node scripts/test-azure-agent.js` to test Azure AI Agent connection
 
 ### Step 3: Production Deployment
 
@@ -50,10 +52,9 @@ Replit automatically transfers your Secrets to the deployment, but verify:
 
 1. In the Deployments tab, check "Environment Variables"
 2. Ensure all required variables are present:
-   - `AZURE_OPENAI_ENDPOINT`
-   - `AZURE_OPENAI_API_KEY`
-   - `ASSISTANT_ID`
-   - `VECTOR_STORE_ID`
+   - `AZURE_AI_ENDPOINT`
+   - `AZURE_AI_AGENT_ID`
+   - `NODE_ENV` (set to "production")
 
 ## 🔧 Configuration Details
 
@@ -112,10 +113,11 @@ Access deployment logs in the Replit Deployments tab:
    - Check variable names match exactly
    - Redeploy after adding new secrets
 
-2. **Azure OpenAI Connection Issues**
-   - Test with `/api/debug` endpoint
-   - Verify API key permissions
-   - Check endpoint URL format
+2. **Azure AI Agent Connection Issues**
+   - Test with `node scripts/test-azure-agent.js`
+   - Verify Azure credentials (run `az login` locally)
+   - Check endpoint URL includes `/api/projects/...`
+   - Verify Agent ID is correct
 
 3. **Build Failures**
    - Check Node.js version compatibility (18+)
