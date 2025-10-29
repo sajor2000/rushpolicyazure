@@ -4,6 +4,98 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&display=swap');
 
+@layer base {
+  :root {
+    /* shadcn CSS variables mapped to Rush University brand colors */
+    --background: 0 0% 98%; /* #FAFAFA */
+    --foreground: 0 0% 37%; /* #5F5858 Rush Black */
+
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 0 0% 37%; /* #5F5858 */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 37%;
+
+    --primary: 158 100% 20%; /* #006332 Legacy Green */
+    --primary-foreground: 0 0% 100%; /* White */
+
+    --secondary: 153 56% 44%; /* #30AE6E Growth Green */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 153 68% 93%; /* #DFF9EB Sage */
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 45 100% 52%; /* #FFC60B Gold */
+    --accent-foreground: 0 0% 37%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 69%; /* #AFAEAF Rush Gray */
+    --input: 0 0% 69%;
+    --ring: 158 100% 20%; /* Legacy Green for focus rings */
+
+    --radius: 0.75rem; /* 12px - Rush rounded corners */
+  }
+
+  .dark {
+    --background: 0 0% 13%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 13%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 13%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 158 100% 20%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 153 56% 44%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 22%;
+    --muted-foreground: 0 0% 69%;
+
+    --accent: 45 100% 52%;
+    --accent-foreground: 0 0% 13%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 22%;
+    --input: 0 0% 22%;
+    --ring: 158 100% 20%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  /* Touch action utilities for mobile */
+  .touch-action-manipulation {
+    touch-action: manipulation;
+  }
+}
+
 /* Rush Brand Typography */
 html {
   height: 100%;

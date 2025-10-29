@@ -7,19 +7,19 @@ import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../constants';
  * Handles copy-to-clipboard with temporary state for UI feedback
  * Properly cleans up timeouts to prevent memory leaks
  *
- * @param {Function} showToast - Toast notification function
- * @returns {Object} Clipboard functions and state
+ * @param showToast - Toast notification function
+ * @returns Clipboard functions and state
  */
-export function useClipboard(showToast) {
-  const [copiedIndex, setCopiedIndex] = useState(null);
-  const timeoutRef = useRef(null);
+export function useClipboard(showToast: (message: string, type?: 'success' | 'error' | 'info') => void) {
+  const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   /**
    * Copy text to clipboard with feedback
-   * @param {string} text - Text to copy
-   * @param {string|number} index - Unique identifier for tracking which item was copied
+   * @param text - Text to copy
+   * @param key - Unique identifier for tracking which item was copied
    */
-  const copyToClipboard = useCallback(async (text, index) => {
+  const copyToClipboard = useCallback(async (text: string, key: string) => {
     try {
       // Clear existing timeout to prevent multiple pending resets
       if (timeoutRef.current) {
@@ -27,7 +27,7 @@ export function useClipboard(showToast) {
       }
 
       await navigator.clipboard.writeText(text);
-      setCopiedIndex(index);
+      setCopiedIndex(key);
       showToast(SUCCESS_MESSAGES.COPIED);
 
       // Reset copied state after 2 seconds

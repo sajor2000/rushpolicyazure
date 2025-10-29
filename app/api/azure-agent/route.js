@@ -13,7 +13,6 @@ import {
 // Extracted utilities
 import { checkRateLimit, cleanupRateLimits, escapePromptInjection } from './security';
 import { withRetry, validateResponse, postProcessResponse, getClientIp } from './helpers';
-import { generateSystemPrompt } from './systemPrompt';
 
 // Initialize Azure AI Project client
 const project = new AIProjectClient(
@@ -97,11 +96,13 @@ export async function POST(request) {
     const escapedMessage = escapePromptInjection(sanitizedMessage);
 
     // Create message in thread
+    // NOTE: Agent already has system instructions configured in Azure
+    // Send the user's question directly
     await withRetry(() =>
       project.agents.messages.create(
         conversationThread.id,
         "user",
-        generateSystemPrompt(escapedMessage)
+        escapedMessage
       )
     );
 
