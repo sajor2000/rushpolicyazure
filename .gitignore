@@ -74,6 +74,7 @@ replit.nix
 # AI Assistant Directories
 .vincent/
 .claude/settings.local.json
+.claude/*.local.*
 
 # Temporary & Test Files
 tmp/
@@ -88,9 +89,11 @@ assets/docs/
 # Refactoring artifacts
 *-refactored.*
 *-old.*
+*.backup
 *.backup.*
 *.pre-refactor
 *_backup.*
+*.bak
 
 # Code review documents
 CODE_REVIEW_*.md
@@ -100,6 +103,9 @@ REFACTORING_*.md
 test-*.js
 !test-assistant.example.js
 !scripts/test-*.js
+
+# Build artifacts from .next cache
+.next/cache/**/*.old
 
 # Keep Important Public Assets
 !public/images/
